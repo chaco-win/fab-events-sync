@@ -1,22 +1,24 @@
-# Majors to always consider (worldwide)
-MAJOR_TYPES = ["Pro Quest+", "Calling", "Battle Hardened", "National Championship", "Pro Tour", "World Championship"]
+FROM python:3.11-slim
 
-# Local radius caps (applied to events fetched with your ZIP that show "(NNN mi)")
-TYPE_RADIUS_MILES = {
-  "Pro Quest" = 250,
-  "Road to Nationals" = 250,
-  "Pre-release" = 50,
-  "Skirmish" = 100
-}
+# minimal deps + timezone support + tiny cron runner
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates tzdata curl \
+ && rm -rf /var/lib/apt/lists/*
 
-# Country allowlists per type (only include if address text contains one of these)
-# Edit these: examples shown
-TYPE_COUNTRY_WHITELIST = {
-  "Battle Hardened" = ["USA", "United States", "US"]
-  "National Championship" = ["USA", "United States", "US", "Canada", "United Kingdom", "UK"]
-  # You can add more, e.g.:
-  # "Calling" = ["USA", "Canada"]
-}
+WORKDIR /app
 
-TIMEZONE = "America/Chicago"
-DEFAULT_EVENT_HOURS = 6
+# supercronic = simple cron runner for containers
+RUN curl -fsSL https://github.com/aptible/supercronic/releases/download/v0.2.29/supercronic-linux-amd64 \
+     -o /usr/local/bin/supercronic && chmod +x /usr/local/bin/supercronic
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# app files
+COPY sync.py .
+COPY crontab /etc/crontab
+COPY config.toml ./config.toml
+
+ENV PYTHONUNBUFFERED=1
+
+# run cron (calls python /app/sync.py per crontab)
+CMD ["/usr/local/bin/supercronic","-passthrough-logs","/etc/crontab"]
