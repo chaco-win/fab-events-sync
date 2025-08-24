@@ -1,0 +1,11 @@
+services:
+  fab-events:
+    build: .                # build from your Dockerfile
+    container_name: fab-events
+    environment:            # config values we pass into the container
+      CALENDAR_ID: "..."
+      FAB_LOCAL_URL: "..."
+      FAB_GLOBAL_URL: "..."
+    secrets:                # mount your service account key
+      - sa.json
+    restart: unless-stopped # auto start if server reboots

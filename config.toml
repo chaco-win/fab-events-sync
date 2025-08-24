@@ -1,0 +1,23 @@
+# Majors we always consider from the GLOBAL feed
+MAJOR_TYPES = ["Pro Quest+", "Calling", "Battle Hardened", "National Championship", "Pro Tour", "World Championship"]
+
+# Per-type local radius caps (miles) from the LOCAL feed (which includes "(NNN mi)")
+TYPE_RADIUS_MILES = {
+  "Pro Quest" = 250,
+  "Road to Nationals" = 250,
+  # Optional extras if you ever want them:
+  # "Pre-release" = 50,
+  # "Skirmish" = 100
+}
+
+# Optional country allowlists for majors (GLOBAL feed).
+# If a type is listed here, only include if the address contains one of these strings.
+TYPE_COUNTRY_WHITELIST = {
+  # Example: only US Battle Hardened
+  "Battle Hardened" = ["USA", "United States", "US"]
+  # Example: limit Nationals to a few countries
+  # "National Championship" = ["USA", "United States", "US", "Canada", "United Kingdom", "UK"]
+}
+
+TIMEZONE = "America/Chicago"
+DEFAULT_EVENT_HOURS = 6
