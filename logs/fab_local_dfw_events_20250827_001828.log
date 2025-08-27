@@ -1,0 +1,8 @@
+2025-08-27 00:18:28,063 - INFO - ================================================================================
+2025-08-27 00:18:28,063 - INFO - FAB Local DFW Events Scraper Started
+2025-08-27 00:18:28,063 - INFO - Timestamp: 2025-08-27 00:18:28
+2025-08-27 00:18:28,064 - INFO - Base URL: https://fabtcg.com/en/events/
+2025-08-27 00:18:28,064 - INFO - Search Location: Fort Worth, TX 76117, USA
+2025-08-27 00:18:28,064 - INFO - Max Distance (Competitive): 250 miles
+2025-08-27 00:18:28,064 - INFO - Max Distance (Prerelease): 100 miles
+2025-08-27 00:18:28,064 - INFO - ================================================================================

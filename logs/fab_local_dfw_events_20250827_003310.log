@@ -1,0 +1,19 @@
+2025-08-27 00:33:10,882 - INFO - ================================================================================
+2025-08-27 00:33:10,882 - INFO - FAB Local DFW Events Scraper Started
+2025-08-27 00:33:10,883 - INFO - Timestamp: 2025-08-27 00:33:10
+2025-08-27 00:33:10,883 - INFO - Base URL: https://fabtcg.com/en/events/
+2025-08-27 00:33:10,883 - INFO - Search Location: Fort Worth, TX 76117, USA
+2025-08-27 00:33:10,884 - INFO - Max Distance (Competitive): 250 miles
+2025-08-27 00:33:10,884 - INFO - Max Distance (Prerelease): 100 miles
+2025-08-27 00:33:10,885 - INFO - ================================================================================
+2025-08-27 00:33:10,885 - INFO - Starting FAB Local DFW Events Scraper & Calendar Sync
+2025-08-27 00:33:10,885 - INFO - ============================================================
+2025-08-27 00:33:10,885 - INFO - Fetching competitive events...
+2025-08-27 00:33:13,463 - INFO - Scraping complete! Found 24 competitive events.
+2025-08-27 00:33:13,464 - INFO - Setting up Google Calendar...
+2025-08-27 00:33:14,633 - INFO - Connected to Google Calendar: Local FAB Events - DFW
+2025-08-27 00:33:14,633 - INFO - Syncing 24 local events to Google Calendar...
+2025-08-27 00:33:34,767 - INFO - Successfully synced 24 local events to calendar
+2025-08-27 00:33:34,771 - INFO - Calendar sync completed!
+2025-08-27 00:33:34,772 - INFO - Script execution completed successfully
+2025-08-27 00:33:34,774 - INFO - ================================================================================
