@@ -4,7 +4,6 @@ Health Check Script for FAB Events Sync System
 
 This script runs weekly on Tuesday to verify the system is ready
 for Wednesday's event synchronization runs.
-
 """
 
 import os
@@ -13,9 +12,18 @@ import logging
 import requests
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
+from googleapiclient.discovery import build
+from google.oauth2.service_account import Credentials
+from dotenv import load_dotenv
 
-# Configure logging
+# Load environment variables
+load_dotenv()
+
+# Google Calendar Configuration
+SCOPES = ['https://www.googleapis.com/auth/calendar']
+SERVICE_ACCOUNT_FILE = 'sa.json'
+
 def setup_logging() -> logging.Logger:
     """Set up logging configuration for the health check script."""
     log_dir = Path("logs")
@@ -103,43 +111,21 @@ def check_log_files() -> bool:
         return False
 
 def check_google_calendar_api() -> bool:
-    """Check if Google Calendar API is accessible using EXACT same code as working scripts."""
+    """Check if Google Calendar API is accessible using the same pattern as working scripts."""
     try:
-        # Import required modules using the EXACT same pattern as working scripts
-        logger.info("DEBUG: Importing Google API modules (same as working scripts)")
-        from googleapiclient.discovery import build
-        from google.oauth2.service_account import Credentials
-        from dotenv import load_dotenv
-        
-        # Load environment variables (same as working scripts)
-        logger.info("DEBUG: Loading environment variables")
-        load_dotenv()
-        
-        # Use the EXACT same configuration as working scripts
-        SCOPES = ['https://www.googleapis.com/auth/calendar']
-        SERVICE_ACCOUNT_FILE = 'sa.json'
-        logger.info(f"DEBUG: Using SCOPES: {SCOPES}")
-        logger.info(f"DEBUG: Using SERVICE_ACCOUNT_FILE: {SERVICE_ACCOUNT_FILE}")
-        
-        # Check if credentials file exists (same as working scripts)
+        # Check if credentials file exists
         if not os.path.exists(SERVICE_ACCOUNT_FILE):
-            logger.error(f"Error: Service account file '{SERVICE_ACCOUNT_FILE}' not found")
+            logger.error(f"Service account file '{SERVICE_ACCOUNT_FILE}' not found")
             return False
         
-        # Load credentials using EXACT same method as working scripts
-        logger.info("DEBUG: Loading credentials using EXACT same method as working scripts")
+        # Load credentials using the same method as working scripts
         credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-        logger.info("DEBUG: Credentials loaded successfully")
         
-        # Build service using EXACT same method as working scripts
-        logger.info("DEBUG: Building calendar service")
+        # Build service using the same method as working scripts
         service = build('calendar', 'v3', credentials=credentials)
-        logger.info("DEBUG: Service built successfully")
         
-        # Test connection using EXACT same method as working scripts
-        logger.info("DEBUG: Testing API connection")
+        # Test connection using the same method as working scripts
         calendar_list = service.calendarList().list(maxResults=1).execute()
-        logger.info(f"DEBUG: API test successful, found {len(calendar_list.get('items', []))} calendars")
         
         logger.info("Google Calendar API is accessible")
         return True
@@ -224,30 +210,19 @@ def main():
     """Main function to run the health check."""
     global logger
     
-    # Debug output to help troubleshoot
-    print("DEBUG: Starting health check script")
-    print(f"DEBUG: Current working directory: {os.getcwd()}")
-    print(f"DEBUG: Python executable: {sys.executable}")
-    print(f"DEBUG: Python version: {sys.version}")
-    
     try:
         logger = setup_logging()
-        print("DEBUG: Logging setup completed")
         
         results = run_health_check()
-        print(f"DEBUG: Health check results: {results}")
         
         # Exit with appropriate code
         if all(results.values()):
-            print("DEBUG: All checks passed, exiting with code 0")
             sys.exit(0)  # Success
         else:
-            print("DEBUG: Some checks failed, exiting with code 1")
             sys.exit(1)  # Failure
             
     except Exception as e:
         error_message = f"Unexpected error during health check: {e}"
-        print(f"DEBUG: Exception occurred: {e}")
         
         # Try to set up logging if it failed earlier
         if 'logger' not in globals():
