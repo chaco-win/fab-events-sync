@@ -124,11 +124,21 @@ def check_google_calendar_api() -> bool:
         logger.info("DEBUG: Importing google.auth.transport.requests")
         from google.auth.transport.requests import Request
         logger.info("DEBUG: Importing google.oauth2.service_account")
-        from google.oauth2.service_account import Credentials as ServiceAccountCredentials
+        import google.oauth2.service_account
         logger.info("DEBUG: Importing googleapiclient.discovery")
         from googleapiclient.discovery import build
         logger.info("DEBUG: Importing dotenv")
         from dotenv import load_dotenv
+        
+        # Debug: Check what we actually imported
+        logger.info(f"DEBUG: google.oauth2.service_account module: {google.oauth2.service_account}")
+        logger.info(f"DEBUG: Available in module: {dir(google.oauth2.service_account)}")
+        
+        # Get the actual Credentials class
+        ServiceAccountCredentials = google.oauth2.service_account.Credentials
+        logger.info(f"DEBUG: ServiceAccountCredentials class: {ServiceAccountCredentials}")
+        logger.info(f"DEBUG: ServiceAccountCredentials type: {type(ServiceAccountCredentials)}")
+        logger.info(f"DEBUG: Is it a class? {isinstance(ServiceAccountCredentials, type)}")
         
         # Load environment variables (same as working scripts)
         logger.info("DEBUG: Loading environment variables")
