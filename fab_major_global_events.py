@@ -4,6 +4,7 @@ FAB Events Calendar Sync - Final Version
 Combines working parsing logic with Google Calendar API integration
 """
 
+# Standard library imports
 import os
 import re
 import json
@@ -11,6 +12,8 @@ import time
 import logging
 from typing import List, Dict, Optional
 from datetime import datetime, timedelta
+
+# Third-party imports
 import requests
 from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
@@ -93,12 +96,15 @@ def fetch_page(url: str) -> Optional[str]:
         response = requests.get(url, headers=headers, timeout=30)
         response.raise_for_status()
         return response.text
+    except requests.RequestException as e:
+        logger.error(f"Network error fetching {url}: {e}")
+        return None
     except Exception as e:
-        logger.error(f"Error fetching {url}: {e}")
+        logger.error(f"Unexpected error fetching {url}: {e}")
         return None
 
 def find_date_in_text(text: str) -> Optional[str]:
-    """Find date patterns in text"""
+    """Find date patterns in text using regex patterns"""
     date_patterns = [
         # Single month patterns
         r'([A-Za-z]{3}\s+\d{1,2}-\d{1,2},?\s+\d{4})',  # Aug 15-17, 2025
@@ -126,7 +132,7 @@ def find_date_in_text(text: str) -> Optional[str]:
     return None
 
 def extract_event_info_from_text(text: str) -> tuple[Optional[str], Optional[str]]:
-    """Extract event type and location from text"""
+    """Extract event type and location from text using regex patterns"""
     event_patterns = [
         r'(Battle Hardened):\s*([^,\n]+)',  # Battle Hardened: Seoul
         r'(Calling):\s*([^,\n]+)',          # Calling: Seattle
@@ -146,7 +152,7 @@ def extract_event_info_from_text(text: str) -> tuple[Optional[str], Optional[str
     return None, None
 
 def calculate_date_range_days(date_text: str) -> int:
-    """Calculate the number of days in a date range"""
+    """Calculate the number of days in a date range for event duration"""
     try:
         if '-' in date_text:
             parts = date_text.split('-')
@@ -184,7 +190,7 @@ def calculate_date_range_days(date_text: str) -> int:
         return 999
 
 def parse_date_to_datetime(date_text: str) -> tuple[Optional[datetime], Optional[datetime]]:
-    """Convert date text to datetime objects for start and end"""
+    """Convert date text to datetime objects for calendar event start and end times"""
     try:
         if '-' in date_text:
             parts = date_text.split('-')
@@ -244,7 +250,7 @@ def parse_date_to_datetime(date_text: str) -> tuple[Optional[datetime], Optional
         return None, None
 
 def should_include_event(event_type: str, location: str) -> bool:
-    """Determine if an event should be included based on filtering rules"""
+    """Determine if an event should be included based on filtering configuration"""
     if not INCLUDE_GLOBAL_MAJORS:
         return False
     
@@ -267,7 +273,7 @@ def should_include_event(event_type: str, location: str) -> bool:
     return False
 
 def find_all_fab_events() -> List[Dict[str, str]]:
-    """Find all FAB events using the working parsing logic"""
+    """Find all FAB events using HTML parsing and regex pattern matching"""
     all_events = []
     
     # Fetch organized play page
@@ -360,7 +366,7 @@ def find_all_fab_events() -> List[Dict[str, str]]:
     return []
 
 def find_event_url(soup: BeautifulSoup, event_type: str, location: str) -> Optional[str]:
-    """Find the URL for a specific event by searching for links containing the event info"""
+    """Find the URL for a specific event by searching HTML links and event cards"""
     try:
         # First, try to find the exact event card/link
         # Look for links that contain both the event type and location
@@ -421,7 +427,7 @@ def find_event_url(soup: BeautifulSoup, event_type: str, location: str) -> Optio
         return None
 
 def setup_google_calendar() -> Optional[build]:
-    """Set up Google Calendar service"""
+    """Set up Google Calendar service using service account credentials"""
     try:
         if not os.path.exists(SERVICE_ACCOUNT_FILE):
             logger.error(f"Error: Service account file '{SERVICE_ACCOUNT_FILE}' not found")
@@ -442,7 +448,7 @@ def setup_google_calendar() -> Optional[build]:
         return None
 
 def get_event_color(event_type: str) -> str:
-    """Get the appropriate color ID for different event types"""
+    """Get the appropriate Google Calendar color ID for different event types"""
     # Google Calendar color IDs:
     # 1=Red, 2=Orange, 3=Yellow, 4=Green, 5=Blue, 6=Purple, 7=Pink, 8=Gray, 9=Brown, 10=Default
     
@@ -457,8 +463,8 @@ def get_event_color(event_type: str) -> str:
     else:
         return '10'  # Default color for unknown types
 
-def create_calendar_event(service: build, event: Dict[str, str]) -> Optional[Dict[str, any]]:
-    """Create a calendar event from FAB event data"""
+def create_calendar_event(service: build, event: Dict[str, str]) -> Optional[Dict[str, str]]:
+    """Create a Google Calendar event from FAB event data with proper formatting"""
     try:
         start_date, end_date = parse_date_to_datetime(event['date_text'])
         if not start_date or not end_date:
@@ -499,7 +505,7 @@ def create_calendar_event(service: build, event: Dict[str, str]) -> Optional[Dic
         return None
 
 def sync_events_to_calendar(service: build, events: List[Dict[str, str]]) -> None:
-    """Sync events to Google Calendar"""
+    """Sync FAB events to Google Calendar with duplicate detection and updates"""
     if not service:
         logger.error("No Google Calendar service available")
         return
@@ -547,7 +553,7 @@ def sync_events_to_calendar(service: build, events: List[Dict[str, str]]) -> Non
     logger.info(f"Successfully synced {success_count} events to calendar")
 
 def get_color_emoji(event_type: str) -> str:
-    """Get emoji representation of event color for console display"""
+    """Get emoji representation of event color for console display and logging"""
     if event_type in ['World Championship', 'Pro Tour']:
         return '🔴'  # Red
     elif event_type == 'World Premiere':
@@ -560,8 +566,9 @@ def get_color_emoji(event_type: str) -> str:
         return '⚪'  # Default
 
 def main():
-    """Main function"""
-    logger.info("Starting FAB Events Calendar Sync...")
+    """Main function for FAB Major Global Events scraper and calendar sync"""
+    logger.info("Starting FAB Major Global Events Scraper & Calendar Sync")
+    logger.info("=" * 60)
     
     # Find all FAB events
     logger.info("Finding all FAB events...")
@@ -585,10 +592,14 @@ def main():
     logger.info("Setting up Google Calendar...")
     service = setup_google_calendar()
     
-    # Sync to calendar
-    sync_events_to_calendar(service, events)
+    if service:
+        # Sync to calendar
+        sync_events_to_calendar(service, events)
+        logger.info("Calendar sync completed!")
+    else:
+        logger.warning("Calendar sync skipped - check CALENDAR_ID in .env file")
     
-    logger.info("FAB Events Calendar Sync completed!")
+    logger.info("Script execution completed successfully")
     logger.info("=" * 80)
 
 if __name__ == "__main__":
