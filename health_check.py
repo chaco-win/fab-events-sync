@@ -112,13 +112,14 @@ def check_google_calendar_api() -> bool:
         logger.info("DEBUG: Importing google.auth.transport.requests")
         from google.auth.transport.requests import Request
         logger.info("DEBUG: Importing google.oauth2.service_account")
-        from google.oauth2.service_account import Credentials
+        from google.oauth2.service_account import Credentials as ServiceAccountCredentials
         logger.info("DEBUG: Importing googleapiclient.discovery")
         from googleapiclient.discovery import build
         
         # Debug: Check what we actually imported
-        logger.info(f"DEBUG: Credentials type: {type(Credentials)}")
-        logger.info(f"DEBUG: Has from_service_account_file: {hasattr(Credentials, 'from_service_account_file')}")
+        logger.info(f"DEBUG: ServiceAccountCredentials type: {type(ServiceAccountCredentials)}")
+        logger.info(f"DEBUG: Has from_service_account_file: {hasattr(ServiceAccountCredentials, 'from_service_account_file')}")
+        logger.info(f"DEBUG: ServiceAccountCredentials module: {ServiceAccountCredentials.__module__}")
         
         # Check if credentials file exists
         creds_file = Path("sa.json")
@@ -128,7 +129,7 @@ def check_google_calendar_api() -> bool:
         
         # Try to load credentials using the correct method
         logger.info("DEBUG: About to call from_service_account_file")
-        creds = Credentials.from_service_account_file("sa.json")
+        creds = ServiceAccountCredentials.from_service_account_file("sa.json")
         logger.info("DEBUG: Credentials loaded successfully")
         
         if not creds.valid:
