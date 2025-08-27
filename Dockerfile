@@ -17,9 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN mkdir -p /app/logs
 
 # app files
-COPY fab_local_dfw_events.py .
-COPY fab_major_global_events.py .
-COPY clean_calendar.py .
+COPY *.py .
 COPY crontab /etc/crontab
 COPY config.toml ./config.toml
 
