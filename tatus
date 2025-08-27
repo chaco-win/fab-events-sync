@@ -1,3 +1,0 @@
-[33me041157[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Add clean_calendar.py to Dockerfile for container access
-[33m938c2de[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix emoji encoding issues and update clean script to handle local events properly
-[33mf617a89[m Add comprehensive testing and calendar cleaning tools: clean_calendar.py, test_scripts.py, run_tests.py, and updated env_example.txt
