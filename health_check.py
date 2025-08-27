@@ -120,25 +120,20 @@ def check_google_calendar_api() -> bool:
         else:
             logger.warning("DEBUG: Could not find /app directory, staying in current directory")
         
-        # Import required modules using the same pattern as working scripts
+        # Import required modules using the EXACT same pattern as working scripts
         logger.info("DEBUG: Importing google.auth.transport.requests")
         from google.auth.transport.requests import Request
         logger.info("DEBUG: Importing google.oauth2.service_account")
-        import google.oauth2.service_account
+        from google.oauth2.service_account import Credentials
         logger.info("DEBUG: Importing googleapiclient.discovery")
         from googleapiclient.discovery import build
         logger.info("DEBUG: Importing dotenv")
         from dotenv import load_dotenv
         
-        # Debug: Check what we actually imported
-        logger.info(f"DEBUG: google.oauth2.service_account module: {google.oauth2.service_account}")
-        logger.info(f"DEBUG: Available in module: {dir(google.oauth2.service_account)}")
-        
-        # Get the actual Credentials class
-        ServiceAccountCredentials = google.oauth2.service_account.Credentials
-        logger.info(f"DEBUG: ServiceAccountCredentials class: {ServiceAccountCredentials}")
-        logger.info(f"DEBUG: ServiceAccountCredentials type: {type(ServiceAccountCredentials)}")
-        logger.info(f"DEBUG: Is it a class? {isinstance(ServiceAccountCredentials, type)}")
+        # Debug: Check what we actually imported (EXACT same as working scripts)
+        logger.info(f"DEBUG: Credentials type: {type(Credentials)}")
+        logger.info(f"DEBUG: Has from_service_account_file: {hasattr(Credentials, 'from_service_account_file')}")
+        logger.info(f"DEBUG: Credentials module: {Credentials.__module__}")
         
         # Load environment variables (same as working scripts)
         logger.info("DEBUG: Loading environment variables")
@@ -172,9 +167,9 @@ def check_google_calendar_api() -> bool:
             logger.error(f"Service account credentials file not found. Tried paths: {[str(p) for p in possible_paths]}")
             return False
         
-        # Try to load credentials using the correct method (same as working scripts)
+        # Try to load credentials using the EXACT same method as working scripts
         logger.info(f"DEBUG: About to call from_service_account_file with path: {creds_file} and scopes: {SCOPES}")
-        creds = ServiceAccountCredentials.from_service_account_file(str(creds_file), scopes=SCOPES)
+        creds = Credentials.from_service_account_file(str(creds_file), scopes=SCOPES)
         logger.info("DEBUG: Credentials loaded successfully")
         
         if not creds.valid:
