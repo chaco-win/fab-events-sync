@@ -1,0 +1,32 @@
+# FAB Events Sync Environment Configuration
+# Copy this file to .env and fill in your actual values
+
+# Calendar IDs (REQUIRED)
+LOCAL_CALENDAR_ID=your_local_calendar_id_here
+CALENDAR_ID=your_global_calendar_id_here
+
+# Local DFW Events Configuration
+SEARCH_LOCATION=Fort Worth, TX 76117, USA
+MAX_DISTANCE_COMPETITIVE=250
+MAX_DISTANCE_PRERELEASE=100
+REQUEST_DELAY=1
+
+# Global Major Events Configuration
+FAB_GLOBAL_URL=https://fabtcg.com/en/organised-play/
+FAB_LOCAL_URL=https://fabtcg.com/en/events/
+INCLUDE_GLOBAL_MAJORS=true
+INCLUDE_US_BATTLE_HARDENED=true
+LOCAL_RADIUS_MILES=100
+USER_LOCATION=Seattle, WA
+
+# URLs (optional - these are the defaults)
+FAB_LOCAL_URL=https://fabtcg.com/en/events/
+FAB_GLOBAL_URL=https://fabtcg.com/en/organised-play/
+
+# Notes:
+# - LOCAL_CALENDAR_ID: Your calendar for local DFW events
+# - CALENDAR_ID: Your calendar for global major events
+# - SEARCH_LOCATION: Your base location for distance calculations
+# - MAX_DISTANCE_*: Maximum distance in miles for different event types
+# - INCLUDE_*: Set to 'true' or 'false' to enable/disable event types
+# - USER_LOCATION: Your location for global event filtering
