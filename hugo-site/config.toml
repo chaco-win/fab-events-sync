@@ -1,7 +1,6 @@
 baseURL = 'https://chaco.dev/fabevents/'
 languageCode = 'en-us'
 title = 'FAB Events Calendar'
-theme = ''
 
 [params]
   description = "Subscribe to FAB TCG event calendars - Local DFW events and Major Global events"
