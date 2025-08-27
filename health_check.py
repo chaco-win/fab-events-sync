@@ -234,19 +234,41 @@ def run_health_check() -> Dict[str, bool]:
 def main():
     """Main function to run the health check."""
     global logger
-    logger = setup_logging()
+    
+    # Debug output to help troubleshoot
+    print("DEBUG: Starting health check script")
+    print(f"DEBUG: Current working directory: {os.getcwd()}")
+    print(f"DEBUG: Python executable: {sys.executable}")
+    print(f"DEBUG: Python version: {sys.version}")
     
     try:
+        logger = setup_logging()
+        print("DEBUG: Logging setup completed")
+        
         results = run_health_check()
+        print(f"DEBUG: Health check results: {results}")
         
         # Exit with appropriate code
         if all(results.values()):
+            print("DEBUG: All checks passed, exiting with code 0")
             sys.exit(0)  # Success
         else:
+            print("DEBUG: Some checks failed, exiting with code 1")
             sys.exit(1)  # Failure
             
     except Exception as e:
         error_message = f"Unexpected error during health check: {e}"
+        print(f"DEBUG: Exception occurred: {e}")
+        
+        # Try to set up logging if it failed earlier
+        if 'logger' not in globals():
+            try:
+                logger = setup_logging()
+            except:
+                # If logging setup fails, just print to console
+                print(f"ERROR: {error_message}")
+                sys.exit(1)
+        
         logger.error(error_message)
         
         # Send Discord error notification
