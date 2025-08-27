@@ -18,10 +18,6 @@ Welcome to FAB Calendar! Please choose a link below to subscribe to your preferr
 
 **iPhone Link:** [Add to iPhone Calendar](webcal://calendar.google.com/calendar/ical/8770b148f3c23449c9c85160535dcf15e1cb5b5a3f76201ec4a2c44f8d65fc1b%40group.calendar.google.com/public/basic.ics)
 
-## 💝 Support the Project
-
-[Click here to donate](https://www.paypal.me/Chase323)
-
 ## 🤖 Discord Bot
 
 Get notified about new FAB events in real-time! Add our Discord bot to your server for instant updates.
@@ -39,3 +35,7 @@ Get notified about new FAB events in real-time! Add our Discord bot to your serv
 Want to add your local FAB events to our calendar? Fill out the form below and we'll get back to you!
 
 **Note:** This form is for requesting new local calendar additions. For major events, please contact the official FAB Organized Play team.
+
+## 💝 Support the Project
+
+[Click here to donate](https://www.paypal.me/Chase323)
