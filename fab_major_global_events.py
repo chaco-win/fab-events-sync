@@ -5,32 +5,34 @@ Combines working parsing logic with Google Calendar API integration
 """
 
 import os
+import re
+import json
+import time
+import logging
+from typing import List, Dict, Optional
+from datetime import datetime, timedelta
 import requests
 from bs4 import BeautifulSoup
-import re
-import logging
-from datetime import datetime, timedelta
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
-import json
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Configuration
+# Configuration constants
 FAB_GLOBAL_URL = os.getenv('FAB_GLOBAL_URL', 'https://fabtcg.com/en/organised-play/')
 FAB_LOCAL_URL = os.getenv('FAB_LOCAL_URL', 'https://fabtcg.com/en/events/')
 
 # Google Calendar Configuration
 SCOPES = ['https://www.googleapis.com/auth/calendar']
-SERVICE_ACCOUNT_FILE = 'sa.json'  # Your service account key file
+SERVICE_ACCOUNT_FILE = 'sa.json'
 CALENDAR_ID = os.getenv('CALENDAR_ID')  # Set this environment variable
 
-# Event filtering
+# Event filtering configuration
 INCLUDE_GLOBAL_MAJORS = os.getenv('INCLUDE_GLOBAL_MAJORS', 'true').lower() == 'true'
 INCLUDE_US_BATTLE_HARDENED = os.getenv('INCLUDE_US_BATTLE_HARDENED', 'true').lower() == 'true'
-LOCAL_RADIUS_MILES = int(os.getenv('LOCAL_RADIUS_MILES', '100'))  # Adjust as needed
+LOCAL_RADIUS_MILES = int(os.getenv('LOCAL_RADIUS_MILES', '100'))  # miles
 USER_LOCATION = os.getenv('USER_LOCATION', 'Seattle, WA')  # Adjust to your location
 
 # Configure logging to both console and file
@@ -81,7 +83,7 @@ logger.info(f"Include Global Majors: {INCLUDE_GLOBAL_MAJORS}")
 logger.info(f"Include US Battle Hardened: {INCLUDE_US_BATTLE_HARDENED}")
 logger.info("=" * 80)
 
-def fetch_page(url):
+def fetch_page(url: str) -> Optional[str]:
     """Fetch a web page"""
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
@@ -92,10 +94,10 @@ def fetch_page(url):
         response.raise_for_status()
         return response.text
     except Exception as e:
-        print(f"Error fetching {url}: {e}")
+        logger.error(f"Error fetching {url}: {e}")
         return None
 
-def find_date_in_text(text):
+def find_date_in_text(text: str) -> Optional[str]:
     """Find date patterns in text"""
     date_patterns = [
         # Single month patterns
@@ -123,7 +125,7 @@ def find_date_in_text(text):
     
     return None
 
-def extract_event_info_from_text(text):
+def extract_event_info_from_text(text: str) -> tuple[Optional[str], Optional[str]]:
     """Extract event type and location from text"""
     event_patterns = [
         r'(Battle Hardened):\s*([^,\n]+)',  # Battle Hardened: Seoul
@@ -143,7 +145,7 @@ def extract_event_info_from_text(text):
     
     return None, None
 
-def calculate_date_range_days(date_text):
+def calculate_date_range_days(date_text: str) -> int:
     """Calculate the number of days in a date range"""
     try:
         if '-' in date_text:
@@ -181,7 +183,7 @@ def calculate_date_range_days(date_text):
     except:
         return 999
 
-def parse_date_to_datetime(date_text):
+def parse_date_to_datetime(date_text: str) -> tuple[Optional[datetime], Optional[datetime]]:
     """Convert date text to datetime objects for start and end"""
     try:
         if '-' in date_text:
@@ -238,10 +240,10 @@ def parse_date_to_datetime(date_text):
         
         return None, None
     except Exception as e:
-        print(f"Debug: Error parsing date '{date_text}': {e}")
+        logger.error(f"Debug: Error parsing date '{date_text}': {e}")
         return None, None
 
-def should_include_event(event_type, location):
+def should_include_event(event_type: str, location: str) -> bool:
     """Determine if an event should be included based on filtering rules"""
     if not INCLUDE_GLOBAL_MAJORS:
         return False
@@ -264,12 +266,12 @@ def should_include_event(event_type, location):
     
     return False
 
-def find_all_fab_events():
+def find_all_fab_events() -> List[Dict[str, str]]:
     """Find all FAB events using the working parsing logic"""
     all_events = []
     
     # Fetch organized play page
-    print(f"Fetching global events: {FAB_GLOBAL_URL}")
+    logger.info(f"Fetching global events: {FAB_GLOBAL_URL}")
     html = fetch_page(FAB_GLOBAL_URL)
     
     if html:
@@ -279,7 +281,7 @@ def find_all_fab_events():
         all_text = soup.get_text()
         event_matches = re.findall(r'(Battle Hardened|Calling|World Championship|Pro Tour|World Premiere):\s*([^,\n]+)', all_text)
         
-        print(f"Found {len(event_matches)} potential event matches in text")
+        logger.info(f"Found {len(event_matches)} potential event matches in text")
         
         for event_type, location in event_matches:
             event_text = f"{event_type}: {location}"
@@ -352,12 +354,12 @@ def find_all_fab_events():
                     unique_events.remove(existing_event)
                     unique_events.append(event)
         
-        print(f"Found {len(unique_events)} unique events after deduplication")
+        logger.info(f"Found {len(unique_events)} unique events after deduplication")
         return unique_events
     
     return []
 
-def find_event_url(soup, event_type, location):
+def find_event_url(soup: BeautifulSoup, event_type: str, location: str) -> Optional[str]:
     """Find the URL for a specific event by searching for links containing the event info"""
     try:
         # First, try to find the exact event card/link
@@ -415,31 +417,31 @@ def find_event_url(soup, event_type, location):
         
         return None
     except Exception as e:
-        print(f"Debug: Error finding URL for {event_type}: {location} - {e}")
+        logger.error(f"Debug: Error finding URL for {event_type}: {location} - {e}")
         return None
 
-def setup_google_calendar():
+def setup_google_calendar() -> Optional[build]:
     """Set up Google Calendar service"""
     try:
         if not os.path.exists(SERVICE_ACCOUNT_FILE):
-            print(f"Error: Service account file '{SERVICE_ACCOUNT_FILE}' not found")
+            logger.error(f"Error: Service account file '{SERVICE_ACCOUNT_FILE}' not found")
             return None
         
         if not CALENDAR_ID:
-            print("Error: CALENDAR_ID environment variable not set")
+            logger.error("Error: CALENDAR_ID environment variable not set")
             return None
         
         credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
         service = build('calendar', 'v3', credentials=credentials)
         
-        print(f"Successfully connected to Google Calendar: {CALENDAR_ID}")
+        logger.info(f"Successfully connected to Google Calendar: {CALENDAR_ID}")
         return service
     
     except Exception as e:
-        print(f"Error setting up Google Calendar: {e}")
+        logger.error(f"Error setting up Google Calendar: {e}")
         return None
 
-def get_event_color(event_type):
+def get_event_color(event_type: str) -> str:
     """Get the appropriate color ID for different event types"""
     # Google Calendar color IDs:
     # 1=Red, 2=Orange, 3=Yellow, 4=Green, 5=Blue, 6=Purple, 7=Pink, 8=Gray, 9=Brown, 10=Default
@@ -455,12 +457,12 @@ def get_event_color(event_type):
     else:
         return '10'  # Default color for unknown types
 
-def create_calendar_event(service, event):
+def create_calendar_event(service: build, event: Dict[str, str]) -> Optional[Dict[str, any]]:
     """Create a calendar event from FAB event data"""
     try:
         start_date, end_date = parse_date_to_datetime(event['date_text'])
         if not start_date or not end_date:
-            print(f"Could not parse date for {event['title']}: {event['date_text']}")
+            logger.warning(f"Could not parse date for {event['title']}: {event['date_text']}")
             return None
         
         # Set end time to end of day
@@ -493,16 +495,16 @@ def create_calendar_event(service, event):
         return calendar_event
     
     except Exception as e:
-        print(f"Error creating calendar event for {event['title']}: {e}")
+        logger.error(f"Error creating calendar event for {event['title']}: {e}")
         return None
 
-def sync_events_to_calendar(service, events):
+def sync_events_to_calendar(service: build, events: List[Dict[str, str]]) -> None:
     """Sync events to Google Calendar"""
     if not service:
-        print("No Google Calendar service available")
+        logger.error("No Google Calendar service available")
         return
     
-    print(f"\nSyncing {len(events)} events to Google Calendar...")
+    logger.info(f"Syncing {len(events)} events to Google Calendar...")
     
     success_count = 0
     for event in events:
@@ -528,23 +530,23 @@ def sync_events_to_calendar(service, events):
                         eventId=event_id,
                         body=calendar_event
                     ).execute()
-                    print(f"  ✅ UPDATED: {event['title']}")
+                    logger.info(f"  ✅ UPDATED: {event['title']}")
                 else:
                     # Create new event
                     created_event = service.events().insert(
                         calendarId=CALENDAR_ID,
                         body=calendar_event
                     ).execute()
-                    print(f"  ✅ CREATED: {event['title']}")
+                    logger.info(f"  ✅ CREATED: {event['title']}")
                 
                 success_count += 1
                 
             except Exception as e:
-                print(f"  ❌ ERROR: {event['title']} - {e}")
+                logger.error(f"  ❌ ERROR: {event['title']} - {e}")
     
-    print(f"\nSuccessfully synced {success_count} events to calendar")
+    logger.info(f"Successfully synced {success_count} events to calendar")
 
-def get_color_emoji(event_type):
+def get_color_emoji(event_type: str) -> str:
     """Get emoji representation of event color for console display"""
     if event_type in ['World Championship', 'Pro Tour']:
         return '🔴'  # Red
