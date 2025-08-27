@@ -148,6 +148,63 @@ header {
     margin-bottom: 1rem;
 }
 
+/* Request section */
+.request-section {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #f0f0f0;
+}
+
+.request-section h3 {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.request-text {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.request-note {
+    color: #888;
+    font-size: 0.9rem;
+    font-style: italic;
+    margin-bottom: 1.5rem;
+}
+
+.form-placeholder {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 1rem 0;
+}
+
+.form-coming-soon {
+    text-align: center;
+}
+
+.form-coming-soon span {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.form-coming-soon p {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.form-subtitle {
+    font-size: 0.9rem;
+    color: #888;
+    font-style: italic;
+}
+
 /* Footer */
 footer {
     text-align: center;

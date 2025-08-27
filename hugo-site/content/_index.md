@@ -20,4 +20,10 @@ Welcome to FAB Calendar! Please choose a link below to subscribe to your preferr
 
 ## 💝 Support the Project
 
-[Click here to donate](https://paypal.me/yourusername)
+[Click here to donate](https://www.paypal.me/Chase323)
+
+## 📝 Request New Local Calendar
+
+Want to add your local FAB events to our calendar? Fill out the form below and we'll get back to you!
+
+**Note:** This form is for requesting new local calendar additions. For major events, please contact the official FAB Organized Play team.
