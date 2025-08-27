@@ -123,10 +123,10 @@ def delete_event(service: build, calendar_id: str, event_id: str, event_summary:
     """Delete a specific event from a calendar"""
     try:
         service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
-        logger.info(f"  [OK] DELETED: {event_summary} from {calendar_name} calendar")
+        logger.info(f"  [OK] DELETED: {event_summary}")
         return True
     except Exception as e:
-        logger.error(f"  [ERROR] deleting {event_summary} from {calendar_name} calendar: {e}")
+        logger.error(f"  [ERROR] deleting {event_summary}: {e}")
         return False
 
 def clean_calendar(service: build, calendar_id: str, calendar_name: str) -> int:
@@ -155,7 +155,7 @@ def clean_calendar(service: build, calendar_id: str, calendar_name: str) -> int:
         summary = event.get('summary', 'Unknown Event')
         start = event.get('start', {}).get('date', 'No date')
         event_id = event.get('id', 'No ID')
-        logger.info(f"{i}. {summary} - {start} (ID: {event_id})")
+        logger.info(f"{i}. {summary} ({start})")
     
     logger.info("-" * 80)
     
