@@ -14,11 +14,12 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # app files
-COPY sync.py .
+COPY fab_local_dfw_events.py .
+COPY fab_major_global_events.py .
 COPY crontab /etc/crontab
 COPY config.toml ./config.toml
 
 ENV PYTHONUNBUFFERED=1
 
-# run cron (calls python /app/sync.py per crontab)
+# run cron (calls python scripts per crontab)
 CMD ["/usr/local/bin/supercronic","-passthrough-logs","/etc/crontab"]
