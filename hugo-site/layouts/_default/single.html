@@ -1,0 +1,43 @@
+{{ define "main" }}
+<div class="content">
+    <div class="welcome-section">
+        <h2>{{ .Title }}</h2>
+        <div class="welcome-text">
+            {{ .Content }}
+        </div>
+    </div>
+    
+    <div class="calendar-links">
+        <div class="calendar-section">
+            <h3>🌍 Global Events</h3>
+            <div class="link-buttons">
+                <a href="https://calendar.google.com/calendar/embed?src=YOUR_MAJOR_CALENDAR_ID" class="btn btn-primary" target="_blank">
+                    📅 Google Calendar
+                </a>
+                <a href="webcal://calendar.google.com/calendar/ical/YOUR_MAJOR_CALENDAR_ID/basic.ics" class="btn btn-secondary">
+                    📱 iPhone Calendar
+                </a>
+            </div>
+        </div>
+        
+        <div class="calendar-section">
+            <h3>🏠 Local DFW Events</h3>
+            <div class="link-buttons">
+                <a href="https://calendar.google.com/calendar/embed?src=YOUR_LOCAL_CALENDAR_ID" class="btn btn-primary" target="_blank">
+                    📅 Google Calendar
+                </a>
+                <a href="webcal://calendar.google.com/calendar/ical/YOUR_LOCAL_CALENDAR_ID/basic.ics" class="btn btn-secondary">
+                    📱 iPhone Calendar
+                </a>
+            </div>
+        </div>
+        
+        <div class="donate-section">
+            <h3>💝 Support the Project</h3>
+            <a href="https://paypal.me/yourusername" class="btn btn-donate" target="_blank">
+                Click here to donate
+            </a>
+        </div>
+    </div>
+</div>
+{{ end }}
