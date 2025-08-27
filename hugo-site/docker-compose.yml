@@ -11,10 +11,9 @@ services:
       - .:/src
       - ./public:/src/public
     working_dir: /src
-    command: ["sh", "-c", "hugo --minify --baseURL=https://chaco.dev/fabevents/ && tail -f /dev/null"]
+    command: hugo --minify --baseURL=https://chaco.dev/fabevents/
     environment:
       - HUGO_ENV=production
-    restart: unless-stopped
     networks:
       - fab-events-web
 
@@ -27,7 +26,8 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - hugo
+      hugo:
+        condition: service_completed_successfully
     restart: unless-stopped
     networks:
       - fab-events-web
