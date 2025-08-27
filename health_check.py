@@ -143,10 +143,11 @@ def check_google_calendar_api() -> bool:
         SCOPES = ['https://www.googleapis.com/auth/calendar']
         logger.info(f"DEBUG: Using scopes: {SCOPES}")
         
-        # Debug: Check what we actually imported
-        logger.info(f"DEBUG: ServiceAccountCredentials type: {type(ServiceAccountCredentials)}")
-        logger.info(f"DEBUG: Has from_service_account_file: {hasattr(ServiceAccountCredentials, 'from_service_account_file')}")
-        logger.info(f"DEBUG: ServiceAccountCredentials module: {ServiceAccountCredentials.__module__}")
+        # Additional debug info to see what we're working with
+        logger.info(f"DEBUG: Credentials class name: {Credentials.__name__}")
+        logger.info(f"DEBUG: Credentials base classes: {Credentials.__bases__}")
+        logger.info(f"DEBUG: Credentials mro: {Credentials.__mro__}")
+        logger.info(f"DEBUG: Credentials dict keys: {list(Credentials.__dict__.keys())[:10]}")  # First 10 keys
         
         # Check if credentials file exists - try multiple possible locations
         possible_paths = [
@@ -172,22 +173,44 @@ def check_google_calendar_api() -> bool:
         creds = Credentials.from_service_account_file(str(creds_file), scopes=SCOPES)
         logger.info("DEBUG: Credentials loaded successfully")
         
+        # Debug the credentials object we got back
+        logger.info(f"DEBUG: Loaded creds type: {type(creds)}")
+        logger.info(f"DEBUG: Loaded creds class: {creds.__class__}")
+        logger.info(f"DEBUG: Loaded creds module: {creds.__class__.__module__}")
+        logger.info(f"DEBUG: Loaded creds valid: {creds.valid}")
+        logger.info(f"DEBUG: Loaded creds expired: {getattr(creds, 'expired', 'N/A')}")
+        logger.info(f"DEBUG: Loaded creds has refresh_token: {hasattr(creds, 'refresh_token')}")
+        logger.info(f"DEBUG: Loaded creds scopes: {getattr(creds, 'scopes', 'N/A')}")
+        
         if not creds.valid:
-            if creds.expired and creds.refresh_token:
-                creds.refresh(Request())
+            logger.warning(f"DEBUG: Credentials not valid, expired: {getattr(creds, 'expired', 'N/A')}")
+            if getattr(creds, 'expired', False) and hasattr(creds, 'refresh_token'):
+                logger.info("DEBUG: Attempting to refresh expired credentials")
+                try:
+                    creds.refresh(Request())
+                    logger.info("DEBUG: Credentials refreshed successfully")
+                except Exception as refresh_error:
+                    logger.error(f"DEBUG: Failed to refresh credentials: {refresh_error}")
+                    return False
             else:
-                logger.error("Invalid or expired credentials")
+                logger.error("DEBUG: Credentials are invalid and cannot be refreshed")
                 return False
         
         # Try to build the service
         logger.info("DEBUG: About to build calendar service")
         service = build('calendar', 'v3', credentials=creds)
+        logger.info(f"DEBUG: Service built successfully, type: {type(service)}")
         
         # Simple API call to test connectivity
         logger.info("DEBUG: About to test API call")
-        calendar_list = service.calendarList().list(maxResults=1).execute()
-        
-        logger.info("Google Calendar API is accessible")
+        try:
+            calendar_list = service.calendarList().list(maxResults=1).execute()
+            logger.info(f"DEBUG: API call successful, got {len(calendar_list.get('items', []))} calendars")
+            logger.info("Google Calendar API is accessible")
+        except Exception as api_error:
+            logger.error(f"DEBUG: API call failed: {api_error}")
+            logger.error(f"DEBUG: API error type: {type(api_error)}")
+            return False
         
         # Restore original working directory
         os.chdir(original_cwd)
