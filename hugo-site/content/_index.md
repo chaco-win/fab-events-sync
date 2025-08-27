@@ -22,6 +22,18 @@ Welcome to FAB Calendar! Please choose a link below to subscribe to your preferr
 
 [Click here to donate](https://www.paypal.me/Chase323)
 
+## 🤖 Discord Bot
+
+Get notified about new FAB events in real-time! Add our Discord bot to your server for instant updates.
+
+**Features:**
+- **New Event Alerts** - Get notified when events are added
+- **Customizable Notifications** - Choose which event types you want
+- **Multiple Servers** - Add to as many Discord servers as you want
+- **Easy Setup** - One-click bot invitation
+
+**Coming Soon!** We're building the Discord bot. Check back soon for the invite link!
+
 ## 📝 Request New Local Calendar
 
 Want to add your local FAB events to our calendar? Fill out the form below and we'll get back to you!

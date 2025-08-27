@@ -148,6 +148,72 @@ header {
     margin-bottom: 1rem;
 }
 
+/* Discord section */
+.discord-section {
+    text-align: center;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 2px solid #f0f0f0;
+}
+
+.discord-section h3 {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.discord-text {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.discord-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.feature-item {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.feature-item span {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.feature-item p {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.bot-coming-soon {
+    background: linear-gradient(135deg, #7289da 0%, #5865f2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+}
+
+.bot-coming-soon span {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.bot-coming-soon p {
+    font-size: 1.1rem;
+    margin: 0;
+}
+
 /* Request section */
 .request-section {
     text-align: center;
