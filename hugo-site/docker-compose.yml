@@ -11,7 +11,7 @@ services:
       - .:/src
       - ./public:/src/public
     working_dir: /src
-    command: hugo --minify --baseURL=https://chaco.dev/fabevents/
+    command: ["hugo", "--minify", "--baseURL=https://chaco.dev/fabevents/"]
     ports:
       - "1313:1313"
     environment:
