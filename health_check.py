@@ -127,6 +127,16 @@ def check_google_calendar_api() -> bool:
         from google.oauth2.service_account import Credentials as ServiceAccountCredentials
         logger.info("DEBUG: Importing googleapiclient.discovery")
         from googleapiclient.discovery import build
+        logger.info("DEBUG: Importing dotenv")
+        from dotenv import load_dotenv
+        
+        # Load environment variables (same as working scripts)
+        logger.info("DEBUG: Loading environment variables")
+        load_dotenv()
+        
+        # Use the same scopes as working scripts
+        SCOPES = ['https://www.googleapis.com/auth/calendar']
+        logger.info(f"DEBUG: Using scopes: {SCOPES}")
         
         # Debug: Check what we actually imported
         logger.info(f"DEBUG: ServiceAccountCredentials type: {type(ServiceAccountCredentials)}")
@@ -152,9 +162,9 @@ def check_google_calendar_api() -> bool:
             logger.error(f"Service account credentials file not found. Tried paths: {[str(p) for p in possible_paths]}")
             return False
         
-        # Try to load credentials using the correct method
-        logger.info(f"DEBUG: About to call from_service_account_file with path: {creds_file}")
-        creds = ServiceAccountCredentials.from_service_account_file(str(creds_file))
+        # Try to load credentials using the correct method (same as working scripts)
+        logger.info(f"DEBUG: About to call from_service_account_file with path: {creds_file} and scopes: {SCOPES}")
+        creds = ServiceAccountCredentials.from_service_account_file(str(creds_file), scopes=SCOPES)
         logger.info("DEBUG: Credentials loaded successfully")
         
         if not creds.valid:
