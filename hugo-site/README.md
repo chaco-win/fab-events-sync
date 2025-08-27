@@ -46,6 +46,14 @@ docker compose up nginx
 docker compose up --build
 ```
 
+## 🌐 **Docker Network**
+
+This Hugo site runs on its own dedicated Docker network (`fab-events-web`) to ensure:
+- **Network isolation** from other services
+- **Clean separation** of web traffic
+- **Easy management** without affecting other containers
+- **Port conflict prevention** with other services
+
 ## 🔧 **Customization**
 
 ### **Update Calendar IDs**

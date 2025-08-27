@@ -1,5 +1,10 @@
 version: '3.8'
 
+networks:
+  fab-events-web:
+    driver: bridge
+    name: fab-events-web
+
 services:
   hugo:
     image: klakegg/hugo:ext-alpine
@@ -14,6 +19,8 @@ services:
     environment:
       - HUGO_ENV=production
     restart: unless-stopped
+    networks:
+      - fab-events-web
 
   nginx:
     image: nginx:alpine
@@ -26,3 +33,5 @@ services:
     depends_on:
       - hugo
     restart: unless-stopped
+    networks:
+      - fab-events-web
