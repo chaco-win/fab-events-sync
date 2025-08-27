@@ -103,132 +103,49 @@ def check_log_files() -> bool:
         return False
 
 def check_google_calendar_api() -> bool:
-    """Check if Google Calendar API is accessible."""
+    """Check if Google Calendar API is accessible using EXACT same code as working scripts."""
     try:
-        # Debug: Print what we're about to import
-        logger.info("DEBUG: About to import Google API modules")
-        
-        # Change to the same working directory that working scripts use
-        original_cwd = os.getcwd()
-        logger.info(f"DEBUG: Original working directory: {original_cwd}")
-        
-        # Try to change to the project root (where sa.json is located)
-        project_root = Path("/app")
-        if project_root.exists():
-            os.chdir(project_root)
-            logger.info(f"DEBUG: Changed to project root: {os.getcwd()}")
-        else:
-            logger.warning("DEBUG: Could not find /app directory, staying in current directory")
-        
         # Import required modules using the EXACT same pattern as working scripts
-        logger.info("DEBUG: Importing google.auth.transport.requests")
-        from google.auth.transport.requests import Request
-        logger.info("DEBUG: Importing google.oauth2.service_account")
-        from google.oauth2.service_account import Credentials
-        logger.info("DEBUG: Importing googleapiclient.discovery")
+        logger.info("DEBUG: Importing Google API modules (same as working scripts)")
         from googleapiclient.discovery import build
-        logger.info("DEBUG: Importing dotenv")
+        from google.oauth2.service_account import Credentials
         from dotenv import load_dotenv
-        
-        # Debug: Check what we actually imported (EXACT same as working scripts)
-        logger.info(f"DEBUG: Credentials type: {type(Credentials)}")
-        logger.info(f"DEBUG: Has from_service_account_file: {hasattr(Credentials, 'from_service_account_file')}")
-        logger.info(f"DEBUG: Credentials module: {Credentials.__module__}")
         
         # Load environment variables (same as working scripts)
         logger.info("DEBUG: Loading environment variables")
         load_dotenv()
         
-        # Use the same scopes as working scripts
+        # Use the EXACT same configuration as working scripts
         SCOPES = ['https://www.googleapis.com/auth/calendar']
-        logger.info(f"DEBUG: Using scopes: {SCOPES}")
+        SERVICE_ACCOUNT_FILE = 'sa.json'
+        logger.info(f"DEBUG: Using SCOPES: {SCOPES}")
+        logger.info(f"DEBUG: Using SERVICE_ACCOUNT_FILE: {SERVICE_ACCOUNT_FILE}")
         
-        # Additional debug info to see what we're working with
-        logger.info(f"DEBUG: Credentials class name: {Credentials.__name__}")
-        logger.info(f"DEBUG: Credentials base classes: {Credentials.__bases__}")
-        logger.info(f"DEBUG: Credentials mro: {Credentials.__mro__}")
-        logger.info(f"DEBUG: Credentials dict keys: {list(Credentials.__dict__.keys())[:10]}")  # First 10 keys
-        
-        # Check if credentials file exists - try multiple possible locations
-        possible_paths = [
-            Path("sa.json"),  # Current directory
-            Path("/app/sa.json"),  # Container app directory
-            Path.cwd() / "sa.json",  # Current working directory
-            Path(__file__).parent / "sa.json"  # Script directory
-        ]
-        
-        creds_file = None
-        for path in possible_paths:
-            if path.exists():
-                creds_file = path
-                logger.info(f"DEBUG: Found credentials file at: {creds_file}")
-                break
-        
-        if not creds_file:
-            logger.error(f"Service account credentials file not found. Tried paths: {[str(p) for p in possible_paths]}")
+        # Check if credentials file exists (same as working scripts)
+        if not os.path.exists(SERVICE_ACCOUNT_FILE):
+            logger.error(f"Error: Service account file '{SERVICE_ACCOUNT_FILE}' not found")
             return False
         
-        # Try to load credentials using the EXACT same method as working scripts
-        logger.info(f"DEBUG: About to call from_service_account_file with path: {creds_file} and scopes: {SCOPES}")
-        creds = Credentials.from_service_account_file(str(creds_file), scopes=SCOPES)
+        # Load credentials using EXACT same method as working scripts
+        logger.info("DEBUG: Loading credentials using EXACT same method as working scripts")
+        credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
         logger.info("DEBUG: Credentials loaded successfully")
         
-        # Debug the credentials object we got back
-        logger.info(f"DEBUG: Loaded creds type: {type(creds)}")
-        logger.info(f"DEBUG: Loaded creds class: {creds.__class__}")
-        logger.info(f"DEBUG: Loaded creds module: {creds.__class__.__module__}")
-        logger.info(f"DEBUG: Loaded creds valid: {creds.valid}")
-        logger.info(f"DEBUG: Loaded creds expired: {getattr(creds, 'expired', 'N/A')}")
-        logger.info(f"DEBUG: Loaded creds has refresh_token: {hasattr(creds, 'refresh_token')}")
-        logger.info(f"DEBUG: Loaded creds scopes: {getattr(creds, 'scopes', 'N/A')}")
+        # Build service using EXACT same method as working scripts
+        logger.info("DEBUG: Building calendar service")
+        service = build('calendar', 'v3', credentials=credentials)
+        logger.info("DEBUG: Service built successfully")
         
-        if not creds.valid:
-            logger.warning(f"DEBUG: Credentials not valid, expired: {getattr(creds, 'expired', 'N/A')}")
-            if getattr(creds, 'expired', False) and hasattr(creds, 'refresh_token'):
-                logger.info("DEBUG: Attempting to refresh expired credentials")
-                try:
-                    creds.refresh(Request())
-                    logger.info("DEBUG: Credentials refreshed successfully")
-                except Exception as refresh_error:
-                    logger.error(f"DEBUG: Failed to refresh credentials: {refresh_error}")
-                    return False
-            else:
-                logger.error("DEBUG: Credentials are invalid and cannot be refreshed")
-                return False
+        # Test connection using EXACT same method as working scripts
+        logger.info("DEBUG: Testing API connection")
+        calendar_list = service.calendarList().list(maxResults=1).execute()
+        logger.info(f"DEBUG: API test successful, found {len(calendar_list.get('items', []))} calendars")
         
-        # Try to build the service
-        logger.info("DEBUG: About to build calendar service")
-        service = build('calendar', 'v3', credentials=creds)
-        logger.info(f"DEBUG: Service built successfully, type: {type(service)}")
-        
-        # Simple API call to test connectivity
-        logger.info("DEBUG: About to test API call")
-        try:
-            calendar_list = service.calendarList().list(maxResults=1).execute()
-            logger.info(f"DEBUG: API call successful, got {len(calendar_list.get('items', []))} calendars")
-            logger.info("Google Calendar API is accessible")
-        except Exception as api_error:
-            logger.error(f"DEBUG: API call failed: {api_error}")
-            logger.error(f"DEBUG: API error type: {type(api_error)}")
-            return False
-        
-        # Restore original working directory
-        os.chdir(original_cwd)
-        logger.info(f"DEBUG: Restored working directory to: {os.getcwd()}")
-        
+        logger.info("Google Calendar API is accessible")
         return True
         
-    except ImportError as e:
-        logger.error(f"Required Google API modules not available: {e}")
-        # Restore original working directory
-        os.chdir(original_cwd)
-        return False
     except Exception as e:
-        logger.error(f"Error testing Google Calendar API: {e}")
-        logger.error(f"DEBUG: Exception type: {type(e)}")
-        logger.error(f"DEBUG: Exception details: {str(e)}")
-        # Restore original working directory
-        os.chdir(original_cwd)
+        logger.error(f"Failed to setup Google Calendar: {e}")
         return False
 
 def check_required_scripts() -> bool:
