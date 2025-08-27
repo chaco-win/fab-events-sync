@@ -5,12 +5,12 @@ Health Check Script for FAB Events Sync System
 This script runs weekly on Tuesday to verify the system is ready
 for Wednesday's event synchronization runs.
 
-Author: FAB Events Sync System
 """
 
 import os
 import sys
 import logging
+import requests
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Tuple
@@ -34,6 +34,34 @@ def setup_logging() -> logging.Logger:
     )
     
     return logging.getLogger(__name__)
+
+def send_discord_alert(message: str, is_error: bool = False) -> bool:
+    """Send alert message to Discord webhook."""
+    try:
+        webhook_url = os.getenv('DISCORD_WEBHOOK_URL')
+        if not webhook_url:
+            logger.warning("No Discord webhook configured - skipping notification")
+            return False
+        
+        # Add emoji and formatting based on message type
+        if is_error:
+            formatted_message = f"🚨 **FAB Events Health Check FAILED**\n{message}"
+        else:
+            formatted_message = f"✅ **FAB Events Health Check PASSED**\n{message}"
+        
+        data = {"content": formatted_message}
+        response = requests.post(webhook_url, json=data)
+        
+        if response.status_code == 204:
+            logger.info("Discord notification sent successfully")
+            return True
+        else:
+            logger.error(f"Failed to send Discord notification: HTTP {response.status_code}")
+            return False
+            
+    except Exception as e:
+        logger.error(f"Failed to send Discord alert: {e}")
+        return False
 
 def check_container_status() -> bool:
     """Check if the Docker container is running."""
@@ -168,11 +196,19 @@ def run_health_check() -> Dict[str, bool]:
     total_checks = len(checks)
     
     if passed_checks == total_checks:
+        success_message = f"System is ready for Wednesday's event synchronization runs ({passed_checks}/{total_checks} checks successful)"
         logger.info(f"[OK] HEALTH CHECK PASSED: {passed_checks}/{total_checks} checks successful")
         logger.info("System is ready for Wednesday's event synchronization runs")
+        
+        # Send Discord success notification
+        send_discord_alert(success_message, is_error=False)
     else:
+        failure_message = f"System needs attention before Wednesday's runs ({passed_checks}/{total_checks} checks successful)"
         logger.error(f"[ERROR] HEALTH CHECK FAILED: {passed_checks}/{total_checks} checks successful")
         logger.error("System needs attention before Wednesday's runs")
+        
+        # Send Discord failure notification
+        send_discord_alert(failure_message, is_error=True)
     
     return checks
 
@@ -191,7 +227,12 @@ def main():
             sys.exit(1)  # Failure
             
     except Exception as e:
-        logger.error(f"Unexpected error during health check: {e}")
+        error_message = f"Unexpected error during health check: {e}"
+        logger.error(error_message)
+        
+        # Send Discord error notification
+        send_discord_alert(error_message, is_error=True)
+        
         sys.exit(1)
 
 if __name__ == "__main__":

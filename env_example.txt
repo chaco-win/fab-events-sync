@@ -1,0 +1,24 @@
+# FAB Events Sync System - Environment Variables Example
+# Copy this file to .env and fill in your actual values
+
+# Google Calendar API Configuration
+GOOGLE_CALENDAR_ID=your_calendar_id_here@group.calendar.google.com
+GOOGLE_CALENDAR_ID_GLOBAL=your_global_calendar_id_here@group.calendar.google.com
+
+# FAB Website Configuration
+FAB_WEBSITE_URL=https://fabtcg.com
+FAB_MAJOR_EVENTS_URL=https://fabtcg.com/events/major-events
+
+# Search Radius Configuration (in miles)
+LOCAL_SEARCH_RADIUS=100
+GLOBAL_SEARCH_RADIUS=250
+
+# Discord Webhook for Health Check Notifications
+# Create a webhook in your Discord server and paste the URL here
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN
+
+# Optional: Custom User Agent for web scraping
+USER_AGENT=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36
+
+# Note: The sa.json file (Google service account credentials) should be placed in the root directory
+# This file is not managed through environment variables for security reasons
