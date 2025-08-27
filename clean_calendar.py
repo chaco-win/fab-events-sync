@@ -74,8 +74,8 @@ def setup_google_calendar() -> Optional[build]:
         logger.error(f"Error setting up Google Calendar: {e}")
         return None
 
-def get_fab_events(service: build, calendar_id: str, calendar_name: str) -> List[Dict]:
-    """Get all FAB events from a specific calendar"""
+def get_events_to_clean(service: build, calendar_id: str, calendar_name: str) -> List[Dict]:
+    """Get events to clean from a specific calendar (all events for local, FAB events for global)"""
     try:
         # Get events from the last 30 days to the next 365 days
         now = datetime.utcnow()
@@ -94,20 +94,26 @@ def get_fab_events(service: build, calendar_id: str, calendar_name: str) -> List
         
         events = events_result.get('items', [])
         
-        # Filter for FAB events only
-        fab_events = []
-        for event in events:
-            summary = event.get('summary', '')
-            description = event.get('description', '')
+        # For local calendar, get ALL events (since they might not have FAB keywords)
+        # For global calendar, filter for FAB events only
+        if 'Local' in calendar_name:
+            logger.info(f"Found {len(events)} total events in {calendar_name} calendar")
+            return events
+        else:
+            # Filter for FAB events only in global calendar
+            fab_events = []
+            for event in events:
+                summary = event.get('summary', '')
+                description = event.get('description', '')
+                
+                # Check if this is a FAB event
+                if any(keyword in summary.lower() for keyword in ['fab', 'flesh and blood', 'battle hardened', 'calling', 'world championship', 'pro tour', 'world premiere']):
+                    fab_events.append(event)
+                elif any(keyword in description.lower() for keyword in ['fab', 'flesh and blood', 'battle hardened', 'calling', 'world championship', 'pro tour', 'world premiere']):
+                    fab_events.append(event)
             
-            # Check if this is a FAB event
-            if any(keyword in summary.lower() for keyword in ['fab', 'flesh and blood', 'battle hardened', 'calling', 'world championship', 'pro tour', 'world premiere']):
-                fab_events.append(event)
-            elif any(keyword in description.lower() for keyword in ['fab', 'flesh and blood', 'battle hardened', 'calling', 'world championship', 'pro tour', 'world premiere']):
-                fab_events.append(event)
-        
-        logger.info(f"Found {len(fab_events)} FAB events in {calendar_name} calendar")
-        return fab_events
+            logger.info(f"Found {len(fab_events)} FAB events in {calendar_name} calendar")
+            return fab_events
         
     except Exception as e:
         logger.error(f"Error fetching events from {calendar_name} calendar: {e}")
@@ -117,10 +123,10 @@ def delete_event(service: build, calendar_id: str, event_id: str, event_summary:
     """Delete a specific event from a calendar"""
     try:
         service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
-        logger.info(f"  ✅ DELETED: {event_summary} from {calendar_name} calendar")
+        logger.info(f"  [OK] DELETED: {event_summary} from {calendar_name} calendar")
         return True
     except Exception as e:
-        logger.error(f"  ❌ ERROR deleting {event_summary} from {calendar_name} calendar: {e}")
+        logger.error(f"  [ERROR] deleting {event_summary} from {calendar_name} calendar: {e}")
         return False
 
 def clean_calendar(service: build, calendar_id: str, calendar_name: str) -> int:
@@ -131,15 +137,18 @@ def clean_calendar(service: build, calendar_id: str, calendar_name: str) -> int:
     
     logger.info(f"Cleaning {calendar_name} calendar...")
     
-    # Get all FAB events
-    events = get_fab_events(service, calendar_id, calendar_name)
+    # Get events to clean (all for local, FAB events for global)
+    events = get_events_to_clean(service, calendar_id, calendar_name)
     
     if not events:
-        logger.info(f"No FAB events found in {calendar_name} calendar")
+        logger.info(f"No events found in {calendar_name} calendar")
         return 0
     
     # Display events that will be deleted
-    logger.info(f"Events to be deleted from {calendar_name} calendar:")
+    if 'Local' in calendar_name:
+        logger.info(f"ALL events to be deleted from {calendar_name} calendar:")
+    else:
+        logger.info(f"FAB events to be deleted from {calendar_name} calendar:")
     logger.info("-" * 80)
     
     for i, event in enumerate(events, 1):
@@ -151,7 +160,10 @@ def clean_calendar(service: build, calendar_id: str, calendar_name: str) -> int:
     logger.info("-" * 80)
     
     # Confirm deletion
-    confirm = input(f"\nAre you sure you want to delete {len(events)} FAB events from {calendar_name} calendar? (yes/no): ")
+    if 'Local' in calendar_name:
+        confirm = input(f"\nAre you sure you want to delete ALL {len(events)} events from {calendar_name} calendar? (yes/no): ")
+    else:
+        confirm = input(f"\nAre you sure you want to delete {len(events)} FAB events from {calendar_name} calendar? (yes/no): ")
     
     if confirm.lower() != 'yes':
         logger.info(f"Deletion cancelled for {calendar_name} calendar")

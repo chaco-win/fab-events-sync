@@ -536,14 +536,14 @@ def sync_events_to_calendar(service: build, events: List[Dict[str, str]]) -> Non
                         eventId=event_id,
                         body=calendar_event
                     ).execute()
-                    logger.info(f"  ✅ UPDATED: {event['title']}")
+                    logger.info(f"  [UPDATED] {event['title']}")
                 else:
                     # Create new event
                     created_event = service.events().insert(
                         calendarId=CALENDAR_ID,
                         body=calendar_event
                     ).execute()
-                    logger.info(f"  ✅ CREATED: {event['title']}")
+                    logger.info(f"  [CREATED] {event['title']}")
                 
                 success_count += 1
                 

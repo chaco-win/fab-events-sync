@@ -589,14 +589,14 @@ def sync_events_to_calendar(service, events):
                         eventId=event_id,
                         body=calendar_event
                     ).execute()
-                    logger.info(f"  ✅ UPDATED: {event.get('title', 'Unknown')}")
+                    logger.info(f"  [UPDATED] {event.get('title', 'Unknown')}")
                 else:
                     # Create new event
                     created_event = service.events().insert(
                         calendarId=LOCAL_CALENDAR_ID,
                         body=calendar_event
                     ).execute()
-                    logger.info(f"  ✅ CREATED: {event.get('title', 'Unknown')}")
+                    logger.info(f"  [CREATED] {event.get('title', 'Unknown')}")
                 
                 success_count += 1
                 
