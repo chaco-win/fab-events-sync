@@ -19,8 +19,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration
-FAB_GLOBAL_URL = "https://fabtcg.com/en/organised-play/"
-FAB_LOCAL_URL = "https://fabtcg.com/en/events/"
+FAB_GLOBAL_URL = os.getenv('FAB_GLOBAL_URL', 'https://fabtcg.com/en/organised-play/')
+FAB_LOCAL_URL = os.getenv('FAB_LOCAL_URL', 'https://fabtcg.com/en/events/')
 
 # Google Calendar Configuration
 SCOPES = ['https://www.googleapis.com/auth/calendar']
@@ -28,10 +28,10 @@ SERVICE_ACCOUNT_FILE = 'sa.json'  # Your service account key file
 CALENDAR_ID = os.getenv('CALENDAR_ID')  # Set this environment variable
 
 # Event filtering
-INCLUDE_GLOBAL_MAJORS = True
-INCLUDE_US_BATTLE_HARDENED = True
-LOCAL_RADIUS_MILES = 100  # Adjust as needed
-USER_LOCATION = "Seattle, WA"  # Adjust to your location
+INCLUDE_GLOBAL_MAJORS = os.getenv('INCLUDE_GLOBAL_MAJORS', 'true').lower() == 'true'
+INCLUDE_US_BATTLE_HARDENED = os.getenv('INCLUDE_US_BATTLE_HARDENED', 'true').lower() == 'true'
+LOCAL_RADIUS_MILES = int(os.getenv('LOCAL_RADIUS_MILES', '100'))  # Adjust as needed
+USER_LOCATION = os.getenv('USER_LOCATION', 'Seattle, WA')  # Adjust to your location
 
 # Configure logging to both console and file
 def setup_logging():
@@ -77,6 +77,8 @@ logger.info(f"Local URL: {FAB_LOCAL_URL}")
 logger.info(f"Calendar ID: {CALENDAR_ID}")
 logger.info(f"User Location: {USER_LOCATION}")
 logger.info(f"Local Radius: {LOCAL_RADIUS_MILES} miles")
+logger.info(f"Include Global Majors: {INCLUDE_GLOBAL_MAJORS}")
+logger.info(f"Include US Battle Hardened: {INCLUDE_US_BATTLE_HARDENED}")
 logger.info("=" * 80)
 
 def fetch_page(url):
