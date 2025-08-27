@@ -121,15 +121,28 @@ def check_google_calendar_api() -> bool:
         logger.info(f"DEBUG: Has from_service_account_file: {hasattr(ServiceAccountCredentials, 'from_service_account_file')}")
         logger.info(f"DEBUG: ServiceAccountCredentials module: {ServiceAccountCredentials.__module__}")
         
-        # Check if credentials file exists
-        creds_file = Path("sa.json")
-        if not creds_file.exists():
-            logger.error("Service account credentials file not found")
+        # Check if credentials file exists - try multiple possible locations
+        possible_paths = [
+            Path("sa.json"),  # Current directory
+            Path("/app/sa.json"),  # Container app directory
+            Path.cwd() / "sa.json",  # Current working directory
+            Path(__file__).parent / "sa.json"  # Script directory
+        ]
+        
+        creds_file = None
+        for path in possible_paths:
+            if path.exists():
+                creds_file = path
+                logger.info(f"DEBUG: Found credentials file at: {creds_file}")
+                break
+        
+        if not creds_file:
+            logger.error(f"Service account credentials file not found. Tried paths: {[str(p) for p in possible_paths]}")
             return False
         
         # Try to load credentials using the correct method
-        logger.info("DEBUG: About to call from_service_account_file")
-        creds = ServiceAccountCredentials.from_service_account_file("sa.json")
+        logger.info(f"DEBUG: About to call from_service_account_file with path: {creds_file}")
+        creds = ServiceAccountCredentials.from_service_account_file(str(creds_file))
         logger.info("DEBUG: Credentials loaded successfully")
         
         if not creds.valid:
