@@ -5,3 +5,4 @@ google-api-python-client==2.140.0
 google-auth==2.34.0
 google-auth-httplib2==0.2.0
 tomli==2.0.1
+python-dotenv
