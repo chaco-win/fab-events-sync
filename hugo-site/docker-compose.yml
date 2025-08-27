@@ -11,9 +11,7 @@ services:
       - .:/src
       - ./public:/src/public
     working_dir: /src
-    command: ["hugo", "--minify", "--baseURL=https://chaco.dev/fabevents/"]
-    ports:
-      - "1313:1313"
+    command: ["sh", "-c", "hugo --minify --baseURL=https://chaco.dev/fabevents/ && tail -f /dev/null"]
     environment:
       - HUGO_ENV=production
     restart: unless-stopped
