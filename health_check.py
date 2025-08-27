@@ -105,10 +105,20 @@ def check_log_files() -> bool:
 def check_google_calendar_api() -> bool:
     """Check if Google Calendar API is accessible."""
     try:
+        # Debug: Print what we're about to import
+        logger.info("DEBUG: About to import Google API modules")
+        
         # Import required modules using the same pattern as working scripts
+        logger.info("DEBUG: Importing google.auth.transport.requests")
         from google.auth.transport.requests import Request
+        logger.info("DEBUG: Importing google.oauth2.service_account")
         from google.oauth2.service_account import Credentials
+        logger.info("DEBUG: Importing googleapiclient.discovery")
         from googleapiclient.discovery import build
+        
+        # Debug: Check what we actually imported
+        logger.info(f"DEBUG: Credentials type: {type(Credentials)}")
+        logger.info(f"DEBUG: Has from_service_account_file: {hasattr(Credentials, 'from_service_account_file')}")
         
         # Check if credentials file exists
         creds_file = Path("sa.json")
@@ -117,7 +127,10 @@ def check_google_calendar_api() -> bool:
             return False
         
         # Try to load credentials using the correct method
+        logger.info("DEBUG: About to call from_service_account_file")
         creds = Credentials.from_service_account_file("sa.json")
+        logger.info("DEBUG: Credentials loaded successfully")
+        
         if not creds.valid:
             if creds.expired and creds.refresh_token:
                 creds.refresh(Request())
@@ -126,9 +139,11 @@ def check_google_calendar_api() -> bool:
                 return False
         
         # Try to build the service
+        logger.info("DEBUG: About to build calendar service")
         service = build('calendar', 'v3', credentials=creds)
         
         # Simple API call to test connectivity
+        logger.info("DEBUG: About to test API call")
         calendar_list = service.calendarList().list(maxResults=1).execute()
         
         logger.info("Google Calendar API is accessible")
@@ -139,6 +154,8 @@ def check_google_calendar_api() -> bool:
         return False
     except Exception as e:
         logger.error(f"Error testing Google Calendar API: {e}")
+        logger.error(f"DEBUG: Exception type: {type(e)}")
+        logger.error(f"DEBUG: Exception details: {str(e)}")
         return False
 
 def check_required_scripts() -> bool:
