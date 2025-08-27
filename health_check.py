@@ -35,19 +35,17 @@ def setup_logging() -> logging.Logger:
     
     return logging.getLogger(__name__)
 
-def send_discord_alert(message: str, is_error: bool = False) -> bool:
-    """Send alert message to Discord webhook."""
+def send_discord_alert(message: str, failed_checks: List[str]) -> bool:
+    """Send alert message to Discord webhook only on failures."""
     try:
         webhook_url = os.getenv('DISCORD_WEBHOOK_URL')
         if not webhook_url:
             logger.warning("No Discord webhook configured - skipping notification")
             return False
         
-        # Add emoji and formatting based on message type
-        if is_error:
-            formatted_message = f"🚨 **FAB Events Health Check FAILED**\n{message}"
-        else:
-            formatted_message = f"✅ **FAB Events Health Check PASSED**\n{message}"
+        # Format the failure message with details
+        failed_details = "\n".join([f"❌ {check}" for check in failed_checks])
+        formatted_message = f"🚨 **FAB Events Health Check FAILED**\n{message}\n\n**Failed Checks:**\n{failed_details}"
         
         data = {"content": formatted_message}
         response = requests.post(webhook_url, json=data)
@@ -107,9 +105,9 @@ def check_log_files() -> bool:
 def check_google_calendar_api() -> bool:
     """Check if Google Calendar API is accessible."""
     try:
-        # Import required modules
+        # Import required modules using the same pattern as working scripts
         from google.auth.transport.requests import Request
-        from google.oauth2.credentials import Credentials
+        from google.oauth2.service_account import Credentials
         from googleapiclient.discovery import build
         
         # Check if credentials file exists
@@ -118,7 +116,7 @@ def check_google_calendar_api() -> bool:
             logger.error("Service account credentials file not found")
             return False
         
-        # Try to load credentials
+        # Try to load credentials using the correct method
         creds = Credentials.from_service_account_file("sa.json")
         if not creds.valid:
             if creds.expired and creds.refresh_token:
@@ -200,15 +198,18 @@ def run_health_check() -> Dict[str, bool]:
         logger.info(f"[OK] HEALTH CHECK PASSED: {passed_checks}/{total_checks} checks successful")
         logger.info("System is ready for Wednesday's event synchronization runs")
         
-        # Send Discord success notification
-        send_discord_alert(success_message, is_error=False)
+        # No Discord notification on success - only on failures
+        logger.info("All checks passed - no Discord notification needed")
     else:
         failure_message = f"System needs attention before Wednesday's runs ({passed_checks}/{total_checks} checks successful)"
         logger.error(f"[ERROR] HEALTH CHECK FAILED: {passed_checks}/{total_checks} checks successful")
         logger.error("System needs attention before Wednesday's runs")
         
-        # Send Discord failure notification
-        send_discord_alert(failure_message, is_error=True)
+        # Get list of failed checks for detailed Discord message
+        failed_checks = [check_name for check_name, status in checks.items() if not status]
+        
+        # Send Discord failure notification with details
+        send_discord_alert(failure_message, failed_checks)
     
     return checks
 
@@ -231,7 +232,7 @@ def main():
         logger.error(error_message)
         
         # Send Discord error notification
-        send_discord_alert(error_message, is_error=True)
+        send_discord_alert(error_message, ["Unexpected System Error"])
         
         sys.exit(1)
 
