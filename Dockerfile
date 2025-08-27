@@ -13,6 +13,9 @@ RUN curl -fsSL https://github.com/aptible/supercronic/releases/download/v0.2.29/
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Create logs directory
+RUN mkdir -p /app/logs
+
 # app files
 COPY fab_local_dfw_events.py .
 COPY fab_major_global_events.py .

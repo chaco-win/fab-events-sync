@@ -8,6 +8,7 @@ import os
 import requests
 from bs4 import BeautifulSoup
 import re
+import logging
 from datetime import datetime, timedelta
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
@@ -31,6 +32,52 @@ INCLUDE_GLOBAL_MAJORS = True
 INCLUDE_US_BATTLE_HARDENED = True
 LOCAL_RADIUS_MILES = 100  # Adjust as needed
 USER_LOCATION = "Seattle, WA"  # Adjust to your location
+
+# Configure logging to both console and file
+def setup_logging():
+    """Setup logging to both console and file"""
+    # Create logs directory if it doesn't exist
+    os.makedirs('logs', exist_ok=True)
+    
+    # Create logger
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    
+    # Clear any existing handlers
+    logger.handlers.clear()
+    
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(console_formatter)
+    
+    # File handler with timestamp
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    file_handler = logging.FileHandler(f'logs/fab_major_global_events_{timestamp}.log')
+    file_handler.setLevel(logging.INFO)
+    file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(file_formatter)
+    
+    # Add handlers
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+    
+    return logger
+
+# Setup logging
+logger = setup_logging()
+
+# Log script start
+logger.info("=" * 80)
+logger.info("FAB Major Global Events Scraper Started")
+logger.info(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+logger.info(f"Global URL: {FAB_GLOBAL_URL}")
+logger.info(f"Local URL: {FAB_LOCAL_URL}")
+logger.info(f"Calendar ID: {CALENDAR_ID}")
+logger.info(f"User Location: {USER_LOCATION}")
+logger.info(f"Local Radius: {LOCAL_RADIUS_MILES} miles")
+logger.info("=" * 80)
 
 def fetch_page(url):
     """Fetch a web page"""
@@ -510,32 +557,35 @@ def get_color_emoji(event_type):
 
 def main():
     """Main function"""
-    print("Starting FAB Events Calendar Sync...")
+    logger.info("Starting FAB Events Calendar Sync...")
     
     # Find all FAB events
+    logger.info("Finding all FAB events...")
     events = find_all_fab_events()
     
     if not events:
-        print("No events found")
+        logger.warning("No events found")
         return
     
     # Display found events with color coding
-    print(f"\nFound {len(events)} events:")
-    print("🎨 Color Coding: 🔴 World Championship/Pro Tour | 🟠 World Premiere | 🟢 Calling | 🔵 Battle Hardened")
-    print("-" * 80)
+    logger.info(f"Found {len(events)} events:")
+    logger.info("🎨 Color Coding: 🔴 World Championship/Pro Tour | 🟠 World Premiere | 🟢 Calling | 🔵 Battle Hardened")
+    logger.info("-" * 80)
     
     for i, event in enumerate(events, 1):
         url_info = f" (URL: {event.get('url', 'No webpage yet')})" if event.get('url') else " (No webpage yet)"
         color_emoji = get_color_emoji(event['type'])
-        print(f"{i}. {color_emoji} {event['type']}: {event['location']} - {event['date_text']}{url_info}")
+        logger.info(f"{i}. {color_emoji} {event['type']}: {event['location']} - {event['date_text']}{url_info}")
     
     # Set up Google Calendar
+    logger.info("Setting up Google Calendar...")
     service = setup_google_calendar()
     
     # Sync to calendar
     sync_events_to_calendar(service, events)
     
-    print("\nFAB Events Calendar Sync completed!")
+    logger.info("FAB Events Calendar Sync completed!")
+    logger.info("=" * 80)
 
 if __name__ == "__main__":
     main()

@@ -2,20 +2,21 @@
 MAJOR_TYPES = [
   "Pro Quest+",
   "Calling",
-  "Battle Hardened",
-  "National Championship",
   "Pro Tour",
-  "World Championship"
+  "World Championship",
+  "National Championship",
+  "World Premiere"
 ]
 
 # ----- Per-type radius caps for local results (miles) -----
 [TYPE_RADIUS_MILES]
 "Pro Quest" = 250
+"Pro Quest+" = 250
 "Road to Nationals" = 250
-"Pre-release" = 50
-"Skirmish"  = 100
+"Pre-release" = 100
+"Skirmish" = 100
 
 # ----- Optional: allow only certain countries for some types -----
 [TYPE_COUNTRY_WHITELIST]
 "Battle Hardened" = ["USA","United States","US"]
-"National Championship" = ["USA","United States","US","Canada","United Kingdom","UK"]
+"National Championship" = ["USA","United States","US"]

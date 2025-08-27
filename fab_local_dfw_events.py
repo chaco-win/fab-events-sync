@@ -32,9 +32,50 @@ SCOPES = ['https://www.googleapis.com/auth/calendar']
 SERVICE_ACCOUNT_FILE = 'sa.json'
 LOCAL_CALENDAR_ID = os.getenv('LOCAL_CALENDAR_ID')  # Your new local events calendar ID
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+# Configure logging to both console and file
+def setup_logging():
+    """Setup logging to both console and file"""
+    # Create logs directory if it doesn't exist
+    os.makedirs('logs', exist_ok=True)
+    
+    # Create logger
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+    
+    # Clear any existing handlers
+    logger.handlers.clear()
+    
+    # Console handler
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    console_handler.setFormatter(console_formatter)
+    
+    # File handler with timestamp
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    file_handler = logging.FileHandler(f'logs/fab_local_dfw_events_{timestamp}.log')
+    file_handler.setLevel(logging.INFO)
+    file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(file_formatter)
+    
+    # Add handlers
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+    
+    return logger
+
+# Setup logging
+logger = setup_logging()
+
+# Log script start
+logger.info("=" * 80)
+logger.info("FAB Local DFW Events Scraper Started")
+logger.info(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+logger.info(f"Base URL: {BASE_URL}")
+logger.info(f"Search Location: {SEARCH_LOCATION}")
+logger.info(f"Max Distance (Competitive): {MAX_DISTANCE_COMPETITIVE} miles")
+logger.info(f"Max Distance (Prerelease): {MAX_DISTANCE_PRERELEASE} miles")
+logger.info("=" * 80)
 
 def fetch_page(url: str, params: Optional[Dict] = None) -> Optional[str]:
     """Fetch a web page with query parameters"""
@@ -589,36 +630,35 @@ def health_check() -> Dict:
 
 def main():
     """Main function for testing"""
-    print("FAB Local DFW Events Scraper & Calendar Sync")
-    print("=" * 60)
+    logger.info("Starting FAB Local DFW Events Scraper & Calendar Sync")
+    logger.info("=" * 60)
     
     # Get events
+    logger.info("Fetching competitive events...")
     events = get_competitive_events()
     
     if not events:
-        print("No competitive events found!")
+        logger.warning("No competitive events found!")
         return
     
     # Display results
     display_results(events)
     
-    print(f"\nScraping complete! Found {len(events)} competitive events.")
+    logger.info(f"Scraping complete! Found {len(events)} competitive events.")
     
     # Set up Google Calendar
-    print("\nSetting up Google Calendar...")
+    logger.info("Setting up Google Calendar...")
     service = setup_google_calendar()
     
     if service:
         # Sync to calendar
         sync_events_to_calendar(service, events)
-        print("\nCalendar sync completed!")
+        logger.info("Calendar sync completed!")
     else:
-        print("\n⚠️  Calendar sync skipped - check LOCAL_CALENDAR_ID in .env file")
+        logger.warning("Calendar sync skipped - check LOCAL_CALENDAR_ID in .env file")
     
-    print("\nAPI Functions Available:")
-    print("  - get_competitive_events() -> List of event dictionaries")
-    print("  - get_competitive_events_by_type('Pro Quest') -> Filtered events")
-    print("  - sync_events_to_calendar(service, events) -> Sync to Google Calendar")
+    logger.info("Script execution completed successfully")
+    logger.info("=" * 80)
 
 if __name__ == "__main__":
     main()
