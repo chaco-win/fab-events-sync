@@ -108,6 +108,18 @@ def check_google_calendar_api() -> bool:
         # Debug: Print what we're about to import
         logger.info("DEBUG: About to import Google API modules")
         
+        # Change to the same working directory that working scripts use
+        original_cwd = os.getcwd()
+        logger.info(f"DEBUG: Original working directory: {original_cwd}")
+        
+        # Try to change to the project root (where sa.json is located)
+        project_root = Path("/app")
+        if project_root.exists():
+            os.chdir(project_root)
+            logger.info(f"DEBUG: Changed to project root: {os.getcwd()}")
+        else:
+            logger.warning("DEBUG: Could not find /app directory, staying in current directory")
+        
         # Import required modules using the same pattern as working scripts
         logger.info("DEBUG: Importing google.auth.transport.requests")
         from google.auth.transport.requests import Request
@@ -161,15 +173,24 @@ def check_google_calendar_api() -> bool:
         calendar_list = service.calendarList().list(maxResults=1).execute()
         
         logger.info("Google Calendar API is accessible")
+        
+        # Restore original working directory
+        os.chdir(original_cwd)
+        logger.info(f"DEBUG: Restored working directory to: {os.getcwd()}")
+        
         return True
         
     except ImportError as e:
         logger.error(f"Required Google API modules not available: {e}")
+        # Restore original working directory
+        os.chdir(original_cwd)
         return False
     except Exception as e:
         logger.error(f"Error testing Google Calendar API: {e}")
         logger.error(f"DEBUG: Exception type: {type(e)}")
         logger.error(f"DEBUG: Exception details: {str(e)}")
+        # Restore original working directory
+        os.chdir(original_cwd)
         return False
 
 def check_required_scripts() -> bool:
