@@ -28,14 +28,7 @@ Welcome! Pick a calendar or option below.
 
 <div class="card">
 <h2>Discord Bot</h2>
-<p>Get real-time notifications in your Discord server when new FAB events are added.</p>
-<ul>
-<li>New event alerts</li>
-<li>Customizable notifications</li>
-<li>Works across multiple servers</li>
-<li>Easy setup</li>
-<li><em>Invite link coming soon</em></li>
-</ul>
+<p class="muted">Invite link coming soon.</p>
 </div>
 
 <div class="card">
