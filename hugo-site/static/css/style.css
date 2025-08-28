@@ -81,6 +81,11 @@ h3 {
     margin-top: 2.25rem;
 }
 
+/* Larger spacing for specific sections */
+.card.spaced {
+    margin-top: 4.5rem;
+}
+
 .card h2 {
     margin-top: 0;
     margin-bottom: 0.5rem;
@@ -206,5 +211,8 @@ a:hover {
     }
     .card + .card {
         margin-top: 1.5rem;
+    }
+    .card.spaced {
+        margin-top: 3rem;
     }
 }
