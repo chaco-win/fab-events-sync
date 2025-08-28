@@ -74,16 +74,16 @@ h3 {
     background: transparent;
     border: none;
     border-radius: 16px;
-    padding: 1rem 0 1rem 0; /* add empty space above each section */
+    padding: 1.5rem 0 1rem 0; /* clear space above each section */
 }
 
 .card + .card {
-    margin-top: 2.5rem;
+    margin-top: 3rem;
 }
 
 /* Larger spacing for specific sections */
 .card.spaced {
-    margin-top: 4.5rem;
+    margin-top: 6rem;
 }
 
 .card h2 {
@@ -209,10 +209,6 @@ a:hover {
         font-size: 1.3rem;
         margin: 2rem 0 1rem 0;
     }
-    .card + .card {
-        margin-top: 1.5rem;
-    }
-    .card.spaced {
-        margin-top: 3rem;
-    }
+    .card + .card { margin-top: 2rem; }
+    .card.spaced { margin-top: 4rem; }
 }
