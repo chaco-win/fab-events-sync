@@ -14,7 +14,7 @@ draft: false
 <p class="muted">ICS works with Apple Calendar, Outlook, and most calendar apps.</p>
 </div>
 
-<div class="card spaced tight-after">
+<div class="card spaced">
 <h2>Local DFW Events</h2>
 <p>Subscribe to the local DFW FAB events calendar.</p>
 <div class="actions">
@@ -24,7 +24,7 @@ draft: false
 <p class="muted">ICS works with Apple Calendar, Outlook, and most calendar apps.</p>
 </div>
 
-<div class="card tight-after">
+<div class="card spaced">
 <h2>Discord Bot</h2>
 <p class="muted">Invite link coming soon.</p>
 </div>
