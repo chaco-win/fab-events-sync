@@ -99,7 +99,7 @@ h3 {
 .actions {
     display: flex;
     flex-direction: column;
-    gap: 1rem; /* a bit more space between buttons */
+    gap: 0.5rem; /* tighter space between buttons */
     margin-top: 0.75rem;
 }
 
