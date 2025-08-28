@@ -38,4 +38,4 @@ Want to add your local FAB events to our calendar? Fill out the form below and w
 
 ## 💝 Support the Project
 
-[Click here to donate](https://www.paypal.me/Chase323)
+If you find this calendar helpful, consider [supporting the project](https://www.paypal.me/Chase323).
