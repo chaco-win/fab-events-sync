@@ -14,7 +14,7 @@ body {
 }
 
 .container {
-    max-width: 760px;
+    max-width: 640px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
@@ -71,12 +71,10 @@ h3 {
 
 /* Section cards for clean spacing */
 .card {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
-    padding: 1.25rem 1.25rem;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(2px);
+    background: transparent;
+    border: none;
+    border-radius: 16px;
+    padding: 0 0 1rem 0;
 }
 
 .card + .card {
@@ -95,7 +93,7 @@ h3 {
 /* Buttons and actions */
 .actions {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 0.6rem;
     margin-top: 0.75rem;
 }
@@ -104,31 +102,36 @@ h3 {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.6rem 0.9rem;
-    border-radius: 10px;
+    padding: 0.85rem 1.1rem;
+    border-radius: 16px;
     font-weight: 600;
     line-height: 1;
     border: 1px solid transparent;
-    text-decoration: none;
+    text-decoration: none !important;
     transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.05s ease;
+    justify-content: center;
+    width: 100%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
 }
 
 .btn:active { transform: translateY(1px); }
 
 .btn-primary {
-    background: #667eea;
+    background: linear-gradient(90deg, #6b8bff 0%, #a366ff 100%);
     color: #fff;
 }
 
-.btn-primary:hover { background: #7a89f0; }
+.btn-primary:hover { filter: brightness(1.05); }
 
 .btn-secondary {
-    background: transparent;
-    color: #cfd4ff;
-    border-color: #667eea;
+    background: rgba(255, 255, 255, 0.18);
+    color: #f2f3ff;
+    border-color: rgba(255,255,255,0.22);
 }
 
-.btn-secondary:hover { background: rgba(102, 126, 234, 0.12); }
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.25); }
+
+.btn:visited { color: inherit; }
 
 .muted { color: #9aa0b4; }
 
