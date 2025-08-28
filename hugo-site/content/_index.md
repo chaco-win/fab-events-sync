@@ -8,6 +8,7 @@ draft: false
 
 Please choose a link below to subscribe to your preferred calendar and platform.
 
+<br><br>
 
 ## 🌍 Global Events
 
@@ -15,6 +16,7 @@ Please choose a link below to subscribe to your preferred calendar and platform.
 
 **iCalendar (ICS) Link (for Apple and non-Google devices):** [Add to Calendar](webcal://calendar.google.com/calendar/ical/218e7e21cc1ab2c39e682ae90d925d3f02a729c9718ae4d1a4bb3c359cc06c6f%40group.calendar.google.com/public/basic.ics)
 
+<br><br>
 
 ## 🏠 Local DFW Events
 
@@ -22,6 +24,7 @@ Please choose a link below to subscribe to your preferred calendar and platform.
 
 **iCalendar (ICS) Link (for Apple and non-Google devices):** [Add to Calendar](webcal://calendar.google.com/calendar/ical/8770b148f3c23449c9c85160535dcf15e1cb5b5a3f76201ec4a2c44f8d65fc1b%40group.calendar.google.com/public/basic.ics)
 
+<br><br>
 
 ## 🤖 Discord Bot
 
@@ -35,6 +38,7 @@ Get notified about new FAB events in real-time! Add our Discord bot to your serv
 
 **Coming Soon!** We're building the Discord bot. Check back soon for the invite link!
 
+<br><br>
 
 ## 📝 Request New Local Calendar
 
@@ -44,6 +48,7 @@ Want to add your local FAB events to our calendar? Fill out the form below and w
 
 **Google Form Coming Soon!** We'll add a form here for calendar requests.
 
+<br><br>
 
 ## 💝 Support the Project
 
