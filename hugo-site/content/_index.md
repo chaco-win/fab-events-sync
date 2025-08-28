@@ -24,12 +24,12 @@ draft: false
 <p class="muted">ICS works with Apple Calendar, Outlook, and most calendar apps.</p>
 </div>
 
-<div class="card spaced">
+<div class="card tight-after">
 <h2>Discord Bot</h2>
 <p class="muted">Invite link coming soon.</p>
 </div>
 
-<div class="card spaced">
+<div class="card">
 <h2>Support the Project</h2>
 <p>If you find this helpful, or would like to add your area to a calendar, please donate below.</p>
 <div class="actions">
