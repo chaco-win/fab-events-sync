@@ -294,9 +294,9 @@ footer {
 h2 {
     font-size: 1.8rem;
     color: #e0e0e0;
-    margin: 3rem 0 1.5rem 0;
-    padding-top: 1rem;
-    border-top: 1px solid #2d2d3f;
+    margin: 4rem 0 2rem 0;
+    padding-top: 0;
+    border-top: none;
 }
 
 h3 {
@@ -307,14 +307,14 @@ h3 {
 
 /* Paragraph spacing */
 p {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     line-height: 1.7;
     color: #b0b0b0;
 }
 
 /* List spacing */
 ul, ol {
-    margin: 2rem 0 2rem 2rem;
+    margin: 2.5rem 0 2.5rem 2rem;
 }
 
 li {
