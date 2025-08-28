@@ -10,9 +10,7 @@ draft: false
 
 **iCalendar (ICS) Link (for Apple and non-Google devices):** [Add to Calendar](webcal://calendar.google.com/calendar/ical/218e7e21cc1ab2c39e682ae90d925d3f02a729c9718ae4d1a4bb3c359cc06c6f%40group.calendar.google.com/public/basic.ics)
 
-/
 ---
-/
 
 ## 🏠 Local DFW Events
 
@@ -20,9 +18,7 @@ draft: false
 
 **iCalendar (ICS) Link (for Apple and non-Google devices):** [Add to Calendar](webcal://calendar.google.com/calendar/ical/8770b148f3c23449c9c85160535dcf15e1cb5b5a3f76201ec4a2c44f8d65fc1b%40group.calendar.google.com/public/basic.ics)
 
-/
 ---
-/
 
 ## 🤖 Discord Bot
 
@@ -36,9 +32,7 @@ Get notified about new FAB events in real-time! Add our Discord bot to your serv
 
 **Coming Soon!** We're building the Discord bot. Check back soon for the invite link!
 
-/
 ---
-/
 
 ## 📝 Request New Local Calendar
 
