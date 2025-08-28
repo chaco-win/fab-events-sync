@@ -1,4 +1,4 @@
----
+ï»¿---
 title: "FAB Events Calendar"
 date: 2025-08-27
 draft: false
@@ -9,15 +9,21 @@ Welcome! Pick a calendar or option below.
 <div class="card">
 <h2>Global Events</h2>
 <p>Subscribe to the global FAB events calendar.</p>
-<p><a href="https://calendar.google.com/calendar/embed?src=218e7e21cc1ab2c39e682ae90d925d3f02a729c9718ae4d1a4bb3c359cc06c6f%40group.calendar.google.com&ctz=America%2FChicago">Subscribe on Google Calendar</a></p>
-<p><a href="webcal://calendar.google.com/calendar/ical/218e7e21cc1ab2c39e682ae90d925d3f02a729c9718ae4d1a4bb3c359cc06c6f%40group.calendar.google.com/public/basic.ics">Add via iCal (ICS)</a></p>
+<div class="actions">
+  <a class="btn btn-primary" href="https://calendar.google.com/calendar/embed?src=218e7e21cc1ab2c39e682ae90d925d3f02a729c9718ae4d1a4bb3c359cc06c6f%40group.calendar.google.com&ctz=America%2FChicago">Google Calendar</a>
+  <a class="btn btn-secondary" href="webcal://calendar.google.com/calendar/ical/218e7e21cc1ab2c39e682ae90d925d3f02a729c9718ae4d1a4bb3c359cc06c6f%40group.calendar.google.com/public/basic.ics">Apple / iCal (ICS)</a>
+</div>
+<p class="muted">ICS works with Apple Calendar, Outlook, and most calendar apps.</p>
 </div>
 
 <div class="card">
 <h2>Local DFW Events</h2>
 <p>Subscribe to the local DFW FAB events calendar.</p>
-<p><a href="https://calendar.google.com/calendar/embed?src=8770b148f3c23449c9c85160535dcf15e1cb5b5a3f76201ec4a2c44f8d65fc1b%40group.calendar.google.com&ctz=America%2FChicago">Subscribe on Google Calendar</a></p>
-<p><a href="webcal://calendar.google.com/calendar/ical/8770b148f3c23449c9c85160535dcf15e1cb5b5a3f76201ec4a2c44f8d65fc1b%40group.calendar.google.com/public/basic.ics">Add via iCal (ICS)</a></p>
+<div class="actions">
+  <a class="btn btn-primary" href="https://calendar.google.com/calendar/embed?src=8770b148f3c23449c9c85160535dcf15e1cb5b5a3f76201ec4a2c44f8d65fc1b%40group.calendar.google.com&ctz=America%2FChicago">Google Calendar</a>
+  <a class="btn btn-secondary" href="webcal://calendar.google.com/calendar/ical/8770b148f3c23449c9c85160535dcf15e1cb5b5a3f76201ec4a2c44f8d65fc1b%40group.calendar.google.com/public/basic.ics">Apple / iCal (ICS)</a>
+</div>
+<p class="muted">ICS works with Apple Calendar, Outlook, and most calendar apps.</p>
 </div>
 
 <div class="card">
@@ -34,12 +40,14 @@ Welcome! Pick a calendar or option below.
 
 <div class="card">
 <h2>Request a New Local Calendar</h2>
-<p>Want to add your local FAB events? Submit a request and we’ll get back to you.</p>
+<p>Want to add your local FAB events? Submit a request and we will get back to you.</p>
 <p><em>Google Form coming soon.</em></p>
 </div>
 
 <div class="card">
 <h2>Support the Project</h2>
 <p>If this is helpful, consider supporting the project.</p>
-<p><a href="https://www.paypal.me/Chase323">Donate via PayPal</a></p>
+<div class="actions">
+  <a class="btn btn-primary" href="https://www.paypal.me/Chase323">Donate via PayPal</a>
+</div>
 </div>
