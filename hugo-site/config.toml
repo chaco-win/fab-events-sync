@@ -1,4 +1,4 @@
-baseURL = 'https://chaco.dev/fabevents/'
+baseURL = 'https://fabevents.chaco.dev/'
 languageCode = 'en-us'
 title = 'FAB Events Calendar'
 
