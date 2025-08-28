@@ -29,7 +29,7 @@ draft: false
 <p class="muted">Invite link coming soon.</p>
 </div>
 
-<div class="card">
+<div class="card mt-tight">
 <h2>Support the Project</h2>
 <p>If you find this helpful, or would like to add your area to a calendar, please donate below.</p>
 <div class="actions">

@@ -91,6 +91,11 @@ h3 {
     margin-top: 0.75rem;
 }
 
+/* Explicit compact top margin when needed */
+.card.mt-tight {
+    margin-top: 0.75rem !important;
+}
+
 .card h2 {
     margin-top: 0;
     margin-bottom: 0.33rem; /* tighter space above the subscribe line */
