@@ -39,229 +39,6 @@ header {
     font-weight: 400;
 }
 
-/* Content */
-.content {
-    background: #1e1e2e;
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-    border: 1px solid #2d2d3f;
-}
-
-.welcome-section {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding-bottom: 2rem;
-    border-bottom: 2px solid #2d2d3f;
-}
-
-.welcome-section h2 {
-    font-size: 1.5rem;
-    color: #e0e0e0;
-    margin-bottom: 1rem;
-}
-
-.welcome-text {
-    color: #b0b0b0;
-    font-size: 1rem;
-}
-
-/* Calendar sections */
-.calendar-section {
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: #2d2d3f;
-    border-radius: 15px;
-    border: 1px solid #3d3d4f;
-}
-
-.calendar-section h3 {
-    font-size: 1.3rem;
-    color: #e0e0e0;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.link-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-/* Buttons */
-.btn {
-    display: block;
-    padding: 1rem 1.5rem;
-    text-decoration: none;
-    border-radius: 12px;
-    font-weight: 600;
-    text-align: center;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #5a6268;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
-}
-
-
-
-/* Donate section */
-.donate-section {
-    text-align: center;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 2px solid #2d2d3f;
-}
-
-.donate-section h3 {
-    font-size: 1.3rem;
-    color: #e0e0e0;
-    margin-bottom: 1rem;
-}
-
-/* Discord section */
-.discord-section {
-    text-align: center;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 2px solid #2d2d3f;
-}
-
-.discord-section h3 {
-    font-size: 1.3rem;
-    color: #e0e0e0;
-    margin-bottom: 1rem;
-}
-
-.discord-text {
-    color: #b0b0b0;
-    font-size: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.discord-features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.feature-item {
-    background: #2d2d3f;
-    border: 1px solid #3d3d4f;
-    border-radius: 12px;
-    padding: 1rem;
-    text-align: center;
-}
-
-.feature-item span {
-    font-size: 2rem;
-    display: block;
-    margin-bottom: 0.5rem;
-}
-
-.feature-item p {
-    color: #b0b0b0;
-    font-size: 0.9rem;
-    margin: 0;
-}
-
-.bot-coming-soon {
-    background: linear-gradient(135deg, #7289da 0%, #5865f2 100%);
-    color: white;
-    border-radius: 15px;
-    padding: 1.5rem;
-    margin: 1rem 0;
-}
-
-.bot-coming-soon span {
-    font-size: 2.5rem;
-    display: block;
-    margin-bottom: 1rem;
-}
-
-.bot-coming-soon p {
-    font-size: 1.1rem;
-    margin: 0;
-}
-
-/* Request section */
-.request-section {
-    text-align: center;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 2px solid #2d2d3f;
-}
-
-.request-section h3 {
-    font-size: 1.3rem;
-    color: #e0e0e0;
-    margin-bottom: 1rem;
-}
-
-.request-text {
-    color: #b0b0b0;
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-}
-
-.request-note {
-    color: #888;
-    font-size: 0.9rem;
-    font-style: italic;
-    margin-bottom: 1.5rem;
-}
-
-.form-placeholder {
-    background: #2d2d3f;
-    border: 2px dashed #4d4d5f;
-    border-radius: 15px;
-    padding: 2rem;
-    margin: 1rem 0;
-}
-
-.form-coming-soon {
-    text-align: center;
-}
-
-.form-coming-soon span {
-    font-size: 3rem;
-    display: block;
-    margin-bottom: 1rem;
-}
-
-.form-coming-soon p {
-    font-size: 1.1rem;
-    color: #b0b0b0;
-    margin-bottom: 0.5rem;
-}
-
-.form-subtitle {
-    font-size: 0.9rem;
-    color: #888;
-    font-style: italic;
-}
-
 /* Footer */
 footer {
     text-align: center;
@@ -270,27 +47,14 @@ footer {
     font-size: 0.9rem;
 }
 
-/* Hugo-generated content spacing */
-.welcome {
+/* Hugo markdown content spacing - this is the key! */
+h1 {
+    font-size: 2.2rem;
+    color: white;
+    margin: 3rem 0 2rem 0;
     text-align: center;
-    margin-bottom: 3rem;
-    padding-bottom: 2rem;
-    border-bottom: 2px solid #2d2d3f;
 }
 
-.welcome h2 {
-    font-size: 1.8rem;
-    color: #e0e0e0;
-    margin-bottom: 1rem;
-}
-
-.welcome p {
-    color: #b0b0b0;
-    font-size: 1.1rem;
-    line-height: 1.7;
-}
-
-/* Section spacing for Hugo content */
 h2 {
     font-size: 1.8rem;
     color: #e0e0e0;
@@ -302,7 +66,7 @@ h2 {
 h3 {
     font-size: 1.4rem;
     color: #e0e0e0;
-    margin: 2rem 0 1rem 0;
+    margin: 2.5rem 0 1.5rem 0;
 }
 
 /* Paragraph spacing */
@@ -318,7 +82,7 @@ ul, ol {
 }
 
 li {
-    margin-bottom: 0.8rem;
+    margin-bottom: 1rem;
     line-height: 1.6;
     color: #b0b0b0;
 }
@@ -335,8 +99,6 @@ a:hover {
     text-decoration: underline;
 }
 
-
-
 /* Responsive design */
 @media (max-width: 768px) {
     .container {
@@ -347,27 +109,18 @@ a:hover {
         font-size: 2rem;
     }
     
-    .content {
-        padding: 1.5rem;
-        margin: 0 0.5rem;
-    }
-    
-    .calendar-section {
-        padding: 1rem;
-    }
-    
-    .btn {
-        padding: 0.875rem 1.25rem;
-        font-size: 0.95rem;
+    h1 {
+        font-size: 1.8rem;
+        margin: 2rem 0 1.5rem 0;
     }
     
     h2 {
-        font-size: 1.4rem;
-        margin: 2rem 0 1rem 0;
+        font-size: 1.5rem;
+        margin: 3rem 0 1.5rem 0;
     }
     
     h3 {
-        font-size: 1.2rem;
-        margin: 1.5rem 0 0.8rem 0;
+        font-size: 1.3rem;
+        margin: 2rem 0 1rem 0;
     }
 }
