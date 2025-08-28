@@ -185,6 +185,12 @@ a:hover {
     text-decoration: underline;
 }
 
+/* Simple spacers for explicit gaps */
+.spacer-xs { height: 8px; }
+.spacer-sm { height: 12px; }
+.spacer-md { height: 20px; }
+.spacer-lg { height: 32px; }
+
 /* Responsive design */
 @media (max-width: 768px) {
     .container {
