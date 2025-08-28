@@ -1,55 +1,45 @@
 ---
-title: "Welcome to FAB Calendar"
+title: "FAB Events Calendar"
 date: 2025-08-27
 draft: false
 ---
 
-# Welcome to FAB Events Calendar! 🎴
+Welcome! Pick a calendar or option below.
 
-Please choose a link below to subscribe to your preferred calendar and platform.
+<div class="card">
+<h2>Global Events</h2>
+<p>Subscribe to the global FAB events calendar.</p>
+<p><a href="https://calendar.google.com/calendar/embed?src=218e7e21cc1ab2c39e682ae90d925d3f02a729c9718ae4d1a4bb3c359cc06c6f%40group.calendar.google.com&ctz=America%2FChicago">Subscribe on Google Calendar</a></p>
+<p><a href="webcal://calendar.google.com/calendar/ical/218e7e21cc1ab2c39e682ae90d925d3f02a729c9718ae4d1a4bb3c359cc06c6f%40group.calendar.google.com/public/basic.ics">Add via iCal (ICS)</a></p>
+</div>
 
-<br><br>
+<div class="card">
+<h2>Local DFW Events</h2>
+<p>Subscribe to the local DFW FAB events calendar.</p>
+<p><a href="https://calendar.google.com/calendar/embed?src=8770b148f3c23449c9c85160535dcf15e1cb5b5a3f76201ec4a2c44f8d65fc1b%40group.calendar.google.com&ctz=America%2FChicago">Subscribe on Google Calendar</a></p>
+<p><a href="webcal://calendar.google.com/calendar/ical/8770b148f3c23449c9c85160535dcf15e1cb5b5a3f76201ec4a2c44f8d65fc1b%40group.calendar.google.com/public/basic.ics">Add via iCal (ICS)</a></p>
+</div>
 
-## 🌍 Global Events
+<div class="card">
+<h2>Discord Bot</h2>
+<p>Get real-time notifications in your Discord server when new FAB events are added.</p>
+<ul>
+<li>New event alerts</li>
+<li>Customizable notifications</li>
+<li>Works across multiple servers</li>
+<li>Easy setup</li>
+<li><em>Invite link coming soon</em></li>
+</ul>
+</div>
 
-**Google Calendar Link:** [Subscribe to Global Events](https://calendar.google.com/calendar/embed?src=218e7e21cc1ab2c39e682ae90d925d3f02a729c9718ae4d1a4bb3c359cc06c6f%40group.calendar.google.com&ctz=America%2FChicago)
+<div class="card">
+<h2>Request a New Local Calendar</h2>
+<p>Want to add your local FAB events? Submit a request and we�ll get back to you.</p>
+<p><em>Google Form coming soon.</em></p>
+</div>
 
-**iCalendar (ICS) Link (for Apple and non-Google devices):** [Add to Calendar](webcal://calendar.google.com/calendar/ical/218e7e21cc1ab2c39e682ae90d925d3f02a729c9718ae4d1a4bb3c359cc06c6f%40group.calendar.google.com/public/basic.ics)
-
-<br><br>
-
-## 🏠 Local DFW Events
-
-**Google Calendar Link:** [Subscribe to Local Events](https://calendar.google.com/calendar/embed?src=8770b148f3c23449c9c85160535dcf15e1cb5b5a3f76201ec4a2c44f8d65fc1b%40group.calendar.google.com&ctz=America%2FChicago)
-
-**iCalendar (ICS) Link (for Apple and non-Google devices):** [Add to Calendar](webcal://calendar.google.com/calendar/ical/8770b148f3c23449c9c85160535dcf15e1cb5b5a3f76201ec4a2c44f8d65fc1b%40group.calendar.google.com/public/basic.ics)
-
-<br><br>
-
-## 🤖 Discord Bot
-
-Get notified about new FAB events in real-time! Add our Discord bot to your server for instant updates.
-
-**Features:**
-- **New Event Alerts** - Get notified when events are added
-- **Customizable Notifications** - Choose which event types you want
-- **Multiple Servers** - Add to as many Discord servers as you want
-- **Easy Setup** - One-click bot invitation
-
-**Coming Soon!** We're building the Discord bot. Check back soon for the invite link!
-
-<br><br>
-
-## 📝 Request New Local Calendar
-
-Want to add your local FAB events to our calendar? Fill out the form below and we'll get back to you!
-
-**Note:** This form is for requesting new local calendar additions. For major events, please contact the official FAB Organized Play team.
-
-**Google Form Coming Soon!** We'll add a form here for calendar requests.
-
-<br><br>
-
-## 💝 Support the Project
-
-If you find this calendar helpful, consider [supporting the project](https://www.paypal.me/Chase323).
+<div class="card">
+<h2>Support the Project</h2>
+<p>If this is helpful, consider supporting the project.</p>
+<p><a href="https://www.paypal.me/Chase323">Donate via PayPal</a></p>
+</div>

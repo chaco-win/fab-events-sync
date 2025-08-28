@@ -6,10 +6,15 @@
     <title>{{ .Site.Title }}</title>
     <link rel="stylesheet" href="/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    {{/* Optional: set a sensible default title if not provided */}}
+    {{ if not .Site.Title }}
+    <title>FAB Events Calendar</title>
+    {{ end }}
 </head>
 <body>
     <header>
-        <div class="title">🎴 FAB Events Calendar</div>
+        <div class="title">FAB Events Calendar</div>
         <div class="subtitle">Stay updated with Flesh and Blood TCG events</div>
     </header>
     
@@ -22,3 +27,4 @@
     </footer>
 </body>
 </html>
+

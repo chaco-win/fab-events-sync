@@ -12,3 +12,8 @@ title = 'FAB Events Calendar'
     name = "Home"
     url = "/"
     weight = 1
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
