@@ -280,6 +280,90 @@ footer {
     font-size: 0.9rem;
 }
 
+/* Hugo-generated content spacing */
+.welcome {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid #2d2d3f;
+}
+
+.welcome h2 {
+    font-size: 1.8rem;
+    color: #e0e0e0;
+    margin-bottom: 1rem;
+}
+
+.welcome p {
+    color: #b0b0b0;
+    font-size: 1.1rem;
+    line-height: 1.7;
+}
+
+/* Section spacing for Hugo content */
+h2 {
+    font-size: 1.6rem;
+    color: #e0e0e0;
+    margin: 2.5rem 0 1.5rem 0;
+    padding-top: 1rem;
+    border-top: 1px solid #2d2d3f;
+}
+
+h3 {
+    font-size: 1.4rem;
+    color: #e0e0e0;
+    margin: 2rem 0 1rem 0;
+}
+
+/* Paragraph spacing */
+p {
+    margin-bottom: 1.2rem;
+    line-height: 1.7;
+    color: #b0b0b0;
+}
+
+/* List spacing */
+ul, ol {
+    margin: 1.5rem 0 1.5rem 2rem;
+}
+
+li {
+    margin-bottom: 0.8rem;
+    line-height: 1.6;
+    color: #b0b0b0;
+}
+
+/* Link styling */
+a {
+    color: #667eea;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #8b9dc3;
+    text-decoration: underline;
+}
+
+/* Support section */
+.support {
+    text-align: center;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 2px solid #2d2d3f;
+}
+
+.support h3 {
+    font-size: 1.4rem;
+    color: #e0e0e0;
+    margin-bottom: 1rem;
+}
+
+.support p {
+    color: #b0b0b0;
+    margin-bottom: 1.5rem;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .container {
@@ -302,5 +386,15 @@ footer {
     .btn {
         padding: 0.875rem 1.25rem;
         font-size: 0.95rem;
+    }
+    
+    h2 {
+        font-size: 1.4rem;
+        margin: 2rem 0 1rem 0;
+    }
+    
+    h3 {
+        font-size: 1.2rem;
+        margin: 1.5rem 0 0.8rem 0;
     }
 }
