@@ -11,8 +11,7 @@ services:
       - .:/src
       - ./public:/src/public
     working_dir: /src
-    entrypoint: ["sh", "-c"]
-    command: ["hugo --minify --baseURL=https://chaco.dev/fabevents/ && tail -f /dev/null"]
+    command: ["--minify", "--baseURL=https://chaco.dev/fabevents/"]
     environment:
       - HUGO_ENV=production
     networks:
