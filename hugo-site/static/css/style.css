@@ -74,11 +74,11 @@ h3 {
     background: transparent;
     border: none;
     border-radius: 16px;
-    padding: 0 0 1rem 0;
+    padding: 1rem 0 1rem 0; /* add empty space above each section */
 }
 
 .card + .card {
-    margin-top: 2.25rem;
+    margin-top: 2.5rem;
 }
 
 /* Larger spacing for specific sections */
@@ -99,7 +99,7 @@ h3 {
 .actions {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
+    gap: 1rem; /* a bit more space between buttons */
     margin-top: 0.75rem;
 }
 
