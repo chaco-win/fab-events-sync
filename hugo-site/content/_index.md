@@ -4,8 +4,6 @@ date: 2025-08-27
 draft: false
 ---
 
-Welcome! Pick a calendar or option below.
-
 <div class="card">
 <h2>Global Events</h2>
 <p>Subscribe to the global FAB events calendar.</p>
@@ -32,14 +30,8 @@ Welcome! Pick a calendar or option below.
 </div>
 
 <div class="card">
-<h2>Request a New Local Calendar</h2>
-<p>Want to add your local FAB events? Submit a request and we will get back to you.</p>
-<p><em>Google Form coming soon.</em></p>
-</div>
-
-<div class="card">
 <h2>Support the Project</h2>
-<p>If this is helpful, consider supporting the project.</p>
+<p>If you find this helpful, or would like to add your area to a calendar, please donate below.</p>
 <div class="actions">
   <a class="btn btn-primary" href="https://www.paypal.me/Chase323">Donate via PayPal</a>
 </div>
