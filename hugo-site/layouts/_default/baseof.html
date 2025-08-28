@@ -4,24 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ .Site.Title }}</title>
-    <meta name="description" content="{{ .Site.Params.description }}">
     <link rel="stylesheet" href="/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1 class="title">🎴 {{ .Site.Title }}</h1>
-            <p class="subtitle">Flesh and Blood TCG Event Calendars</p>
-        </header>
-        
-        <main>
-            {{ block "main" . }}{{ end }}
-        </main>
-        
-        <footer>
-            <p>&copy; 2025 FAB Events Sync</p>
-        </footer>
-    </div>
+    <header>
+        <h1>🎴 FAB Events Calendar</h1>
+        <p>Stay updated with Flesh and Blood TCG events</p>
+    </header>
+    
+    <main>
+        {{ block "main" . }}{{ end }}
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 FAB Events Sync. Built with Hugo.</p>
+    </footer>
 </body>
 </html>
