@@ -58,7 +58,7 @@ h1 {
 h2 {
     font-size: 1.8rem;
     color: #e0e0e0;
-    margin: 4rem 0 2rem 0;
+    margin: 2rem 0 1rem 0;
     padding-top: 0;
     border-top: none;
 }
@@ -74,16 +74,16 @@ h3 {
     background: transparent;
     border: none;
     border-radius: 16px;
-    padding: 1.5rem 0 1rem 0; /* clear space above each section */
+    padding: 0 0 1rem 0;
 }
 
 .card + .card {
-    margin-top: 3rem;
+    margin-top: 1.75rem;
 }
 
 /* Larger spacing for specific sections */
 .card.spaced {
-    margin-top: 6rem;
+    margin-top: 2.25rem;
 }
 
 .card h2 {
@@ -208,13 +208,13 @@ a:hover {
     
     h2 {
         font-size: 1.5rem;
-        margin: 3rem 0 1.5rem 0;
+        margin: 1.5rem 0 1rem 0;
     }
     
     h3 {
         font-size: 1.3rem;
         margin: 2rem 0 1rem 0;
     }
-    .card + .card { margin-top: 2rem; }
-    .card.spaced { margin-top: 4rem; }
+    .card + .card { margin-top: 1.25rem; }
+    .card.spaced { margin-top: 1.75rem; }
 }
