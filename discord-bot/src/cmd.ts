@@ -34,11 +34,19 @@ async function registerCommands() {
       .addSubcommand(sc => sc
         .setName('subscribe')
         .setDescription('Subscribe this server to a calendar')
-        .addStringOption(o => o.setName('calendar_id').setDescription('Calendar ID').setRequired(true)))
+        .addStringOption(o => o
+          .setName('calendar_id')
+          .setDescription('Calendar name')
+          .setRequired(true)
+          .setAutocomplete(true)))
       .addSubcommand(sc => sc
         .setName('unsubscribe')
         .setDescription('Unsubscribe this server from a calendar')
-        .addStringOption(o => o.setName('calendar_id').setDescription('Calendar ID').setRequired(true)))
+        .addStringOption(o => o
+          .setName('calendar_id')
+          .setDescription('Calendar name')
+          .setRequired(true)
+          .setAutocomplete(true)))
       .addSubcommand(sc => sc
         .setName('list')
         .setDescription('List subscriptions and available calendars'))
@@ -64,6 +72,18 @@ client.on('ready', () => {
 });
 
 client.on('interactionCreate', async (interaction) => {
+  if (interaction.isAutocomplete()) {
+    if (interaction.commandName !== 'notify') return;
+    const focused = interaction.options.getFocused()?.toString() ?? '';
+    const rows = db.prepare('SELECT COALESCE(name, calendar_id) as name FROM calendars ORDER BY name LIMIT 25').all() as { name: string }[];
+    const choices = rows
+      .map(r => r.name)
+      .filter(n => !focused || n.toLowerCase().includes(focused.toLowerCase()))
+      .slice(0, 25)
+      .map(n => ({ name: n, value: n }));
+    try { await interaction.respond(choices); } catch (_) {}
+    return;
+  }
   if (!interaction.isChatInputCommand()) return;
   if (interaction.commandName !== 'notify') return;
 
@@ -77,8 +97,13 @@ client.on('interactionCreate', async (interaction) => {
   if (sub === 'subscribe') {
     const input = interaction.options.getString('calendar_id', true);
     const row = db.prepare('SELECT calendar_id, COALESCE(name, calendar_id) AS name FROM calendars WHERE calendar_id = ? OR name = ?').get(input, input) as { calendar_id: string; name: string } | undefined;
-    const cal = row?.calendar_id ?? input;
-    const name = row?.name ?? input;
+    if (!row) {
+      const names = db.prepare('SELECT COALESCE(name, calendar_id) as name FROM calendars ORDER BY name').all() as { name: string }[];
+      await interaction.reply({ content: `Unknown calendar "${input}". Available: ${names.map(n => n.name).join(', ')}`, ephemeral: true });
+      return;
+    }
+    const cal = row.calendar_id;
+    const name = row.name;
     db.prepare('INSERT OR IGNORE INTO guild_calendar_subscriptions(guild_id, calendar_id) VALUES (?,?)').run(interaction.guildId!, cal);
     await interaction.reply({ content: `Subscribed to ${name}.`, ephemeral: true });
     return;
@@ -86,8 +111,13 @@ client.on('interactionCreate', async (interaction) => {
   if (sub === 'unsubscribe') {
     const input = interaction.options.getString('calendar_id', true);
     const row = db.prepare('SELECT calendar_id, COALESCE(name, calendar_id) AS name FROM calendars WHERE calendar_id = ? OR name = ?').get(input, input) as { calendar_id: string; name: string } | undefined;
-    const cal = row?.calendar_id ?? input;
-    const name = row?.name ?? input;
+    if (!row) {
+      const names = db.prepare('SELECT COALESCE(name, calendar_id) as name FROM calendars ORDER BY name').all() as { name: string }[];
+      await interaction.reply({ content: `Unknown calendar "${input}". Available: ${names.map(n => n.name).join(', ')}`, ephemeral: true });
+      return;
+    }
+    const cal = row.calendar_id;
+    const name = row.name;
     db.prepare('DELETE FROM guild_calendar_subscriptions WHERE guild_id = ? AND calendar_id = ?').run(interaction.guildId!, cal);
     await interaction.reply({ content: `Unsubscribed from ${name}.`, ephemeral: true });
     return;
