@@ -19,9 +19,12 @@ from bs4 import BeautifulSoup
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
 from dotenv import load_dotenv
+import hashlib
 
-# Load environment variables from .env file
-load_dotenv()
+# Load env: base .env then override with .env.local if present
+load_dotenv(dotenv_path='.env', override=False)
+if os.path.exists('.env.local'):
+    load_dotenv(dotenv_path='.env.local', override=True)
 
 # Configuration constants
 FAB_GLOBAL_URL = os.getenv('FAB_GLOBAL_URL', 'https://fabtcg.com/en/organised-play/')
@@ -30,7 +33,8 @@ FAB_LOCAL_URL = os.getenv('FAB_LOCAL_URL', 'https://fabtcg.com/en/events/')
 # Google Calendar Configuration
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 SERVICE_ACCOUNT_FILE = 'sa.json'
-CALENDAR_ID = os.getenv('CALENDAR_ID')  # Set this environment variable
+# Prefer GLOBAL_CALENDAR_ID; fallback to legacy CALENDAR_ID for compatibility
+CALENDAR_ID = os.getenv('GLOBAL_CALENDAR_ID') or os.getenv('CALENDAR_ID')
 
 # Event filtering configuration
 INCLUDE_GLOBAL_MAJORS = os.getenv('INCLUDE_GLOBAL_MAJORS', 'true').lower() == 'true'
@@ -588,6 +592,36 @@ def main():
         color_emoji = get_color_emoji(event['type'])
         logger.info(f"{i}. {color_emoji} {event['type']}: {event['location']} - {event['date_text']}{url_info}")
     
+    # Write API-ready JSON for the Discord bot
+    try:
+        os.makedirs('data', exist_ok=True)
+        records = []
+        now_iso = datetime.utcnow().replace(microsecond=0).isoformat() + 'Z'
+        for e in events:
+            base = f"{CALENDAR_ID}:{e.get('title','')}:{e.get('location','')}:{e.get('date_text','')}"
+            event_id = hashlib.sha1(base.encode('utf-8')).hexdigest()
+            try:
+                from_dt, _to_dt = parse_date_to_datetime(e.get('date_text', '') or '')
+            except Exception:
+                from_dt = None
+            starts_at = (from_dt or datetime.utcnow()).strftime('%Y-%m-%dT00:00:00Z')
+            records.append({
+                'event_id': event_id,
+                'calendar_id': str(CALENDAR_ID) if CALENDAR_ID else 'global',
+                'title': e.get('title', ''),
+                'starts_at': starts_at,
+                'ends_at': None,
+                'url': e.get('url') or None,
+                'updated_at': now_iso,
+                'location': e.get('location') or None,
+            })
+        out_path = os.path.join('data', 'global_events.json')
+        with open(out_path, 'w', encoding='utf-8') as f:
+            json.dump(records, f, ensure_ascii=False, indent=2)
+        logger.info(f"Wrote {len(records)} events to {out_path}")
+    except Exception as write_err:
+        logger.error(f"Failed to write JSON to data/: {write_err}")
+
     # Set up Google Calendar
     logger.info("Setting up Google Calendar...")
     service = setup_google_calendar()

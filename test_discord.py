@@ -12,7 +12,10 @@ from dotenv import load_dotenv
 def test_discord_webhook():
     """Test the Discord webhook connection."""
     # Load environment variables
-    load_dotenv()
+    load_dotenv(dotenv_path='.env', override=False)
+    import os
+    if os.path.exists('.env.local'):
+        load_dotenv(dotenv_path='.env.local', override=True)
     
     # Get webhook URL
     webhook_url = os.getenv('DISCORD_WEBHOOK_URL')

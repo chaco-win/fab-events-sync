@@ -2,7 +2,8 @@
 # Copy this file to .env and fill in your actual values
 
 # Google Calendar Configuration
-CALENDAR_ID="your_global_calendar_id_here@group.calendar.google.com"
+# Use GLOBAL_CALENDAR_ID for the global calendar. CALENDAR_ID is still supported as a fallback.
+GLOBAL_CALENDAR_ID="your_global_calendar_id_here@group.calendar.google.com"
 LOCAL_CALENDAR_ID="your_local_calendar_id_here@group.calendar.google.com"
 GOOGLE_APPLICATION_CREDENTIALS=sa.json
 

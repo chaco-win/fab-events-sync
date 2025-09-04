@@ -3,3 +3,10 @@ __pycache__/
 *.pyc
 logs/
 .env
+.env.local
+.env.*
+discord-bot/.env.*
+discord-bot/.env.local
+discord-bot/var/
+discord-bot/node_modules/
+discord-bot/dist/

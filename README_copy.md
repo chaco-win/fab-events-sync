@@ -2,7 +2,7 @@
 
 ## Project Links
 - Live site: https://fabevents.chaco.dev
-- Data folder: `data/` (e.g., `global_events.json`, `dfw_events.json`)
+- Data JSON: `data/events.json`
 - Discord Bot: `discord-bot/README.md`
 
 A comprehensive system for automatically synchronizing Flesh and Blood (FAB) TCG events to Google Calendar. This project scrapes competitive events from the official FAB website and local event locator, then automatically adds them to your Google Calendar with proper categorization and details.

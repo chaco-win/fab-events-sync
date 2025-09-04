@@ -1,0 +1,27 @@
+{
+  "name": "fab-events-discord-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p .",
+    "start:cmd": "node dist/cmd.js",
+    "start:worker": "node dist/worker.js",
+    "dev:cmd": "tsx watch src/cmd.ts",
+    "dev:worker": "tsx watch src/worker.ts"
+  },
+  "dependencies": {
+    "@discordjs/rest": "^2.3.0",
+    "discord-api-types": "^0.37.83",
+    "discord.js": "^14.15.3",
+    "better-sqlite3": "^9.5.0",
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.4"
+  }
+}
+

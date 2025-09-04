@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  bot-cmd:
+    build: .
+    image: fab-events-discord-bot:latest
+    container_name: fab-bot-cmd
+    env_file:
+      - .env
+    environment:
+      - DB_PATH=/app/var/bot.db
+      - TZ=${TZ:-America/Chicago}
+    volumes:
+      - ./var:/app/var
+      - ../data:/app/data:ro
+    command: ["node", "dist/cmd.js"]
+    restart: unless-stopped
+
+  bot-worker:
+    build: .
+    image: fab-events-discord-bot:latest
+    container_name: fab-bot-worker
+    env_file:
+      - .env
+    environment:
+      - DB_PATH=/app/var/bot.db
+      - DATA_JSON_PATH=/app/data
+      - SCHEDULE_CRON=${SCHEDULE_CRON:-0 9 * * 3}
+      - TZ=${TZ:-America/Chicago}
+    volumes:
+      - ./var:/app/var
+      - ../data:/app/data:ro
+    command: ["node", "dist/worker.js"]
+    restart: unless-stopped
+
+volumes:
+  bot_data:

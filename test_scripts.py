@@ -13,7 +13,10 @@ from typing import Dict, List, Tuple
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv(dotenv_path='.env', override=False)
+import os
+if os.path.exists('.env.local'):
+    load_dotenv(dotenv_path='.env.local', override=True)
 
 def setup_logging():
     """Setup logging for test results"""

@@ -18,7 +18,10 @@ from google.oauth2.service_account import Credentials
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv()
+load_dotenv(dotenv_path='.env', override=False)
+import os
+if os.path.exists('.env.local'):
+    load_dotenv(dotenv_path='.env.local', override=True)
 
 # Google Calendar Configuration
 SCOPES = ['https://www.googleapis.com/auth/calendar']

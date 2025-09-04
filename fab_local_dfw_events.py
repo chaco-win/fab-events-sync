@@ -16,9 +16,12 @@ from datetime import datetime, timedelta
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
 from dotenv import load_dotenv
+import hashlib
 
-# Load environment variables
-load_dotenv()
+# Load env: base .env then override with .env.local if present
+load_dotenv(dotenv_path='.env', override=False)
+if os.path.exists('.env.local'):
+    load_dotenv(dotenv_path='.env.local', override=True)
 
 # Configuration constants
 BASE_URL = os.getenv('FAB_LOCAL_URL', 'https://fabtcg.com/en/events/')
@@ -643,6 +646,37 @@ def main():
     
     # Display results
     display_results(events)
+
+    # Write API-ready JSON for the Discord bot
+    try:
+        os.makedirs('data', exist_ok=True)
+        records = []
+        now_iso = datetime.utcnow().replace(microsecond=0).isoformat() + 'Z'
+        for e in events:
+            base = f"{LOCAL_CALENDAR_ID}:{e.get('title','')}:{e.get('location','') or e.get('store_name','')}:{e.get('date_text','')}"
+            event_id = hashlib.sha1(base.encode('utf-8')).hexdigest()
+            # Parse start date using the local parser
+            try:
+                start_dt = parse_local_event_date(e.get('date_text', '') or '')
+            except Exception:
+                start_dt = None
+            starts_at = (start_dt or datetime.utcnow()).strftime('%Y-%m-%dT00:00:00Z')
+            records.append({
+                'event_id': event_id,
+                'calendar_id': str(LOCAL_CALENDAR_ID) if LOCAL_CALENDAR_ID else 'local',
+                'title': e.get('title', ''),
+                'starts_at': starts_at,
+                'ends_at': None,
+                'url': e.get('url') or None,
+                'updated_at': now_iso,
+                'location': e.get('location') or e.get('store_name') or None,
+            })
+        out_path = os.path.join('data', 'dfw_events.json')
+        with open(out_path, 'w', encoding='utf-8') as f:
+            json.dump(records, f, ensure_ascii=False, indent=2)
+        logger.info(f"Wrote {len(records)} events to {out_path}")
+    except Exception as write_err:
+        logger.error(f"Failed to write JSON to data/: {write_err}")
     
     logger.info(f"Scraping complete! Found {len(events)} competitive events.")
     
