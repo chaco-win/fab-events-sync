@@ -4,10 +4,12 @@ import { db } from './db.js';
 import { DiffResult } from './diff.js';
 
 const TOKEN = process.env.DISCORD_TOKEN || '';
+const SITE_URL = process.env.SITE_URL || 'https://fabevents.chaco.dev';
+const TZ = process.env.TZ || 'America/Chicago';
 const rest = TOKEN ? new REST({ version: '10' }).setToken(TOKEN) : null;
 
 function formatEventLine(e: { title: string; starts_at: string; url?: string | null; calendarName?: string | null }) {
-  const when = new Date(e.starts_at).toLocaleString('en-US', { timeZone: process.env.TZ || 'America/Chicago' });
+  const when = new Date(e.starts_at).toLocaleString('en-US', { timeZone: TZ });
   const link = e.url ? ` — ${e.url}` : '';
   const cal = e.calendarName ? ` [${e.calendarName}]` : '';
   return `• ${e.title}${cal} — ${when}${link}`;
@@ -34,7 +36,9 @@ export async function sendNotifications(diffs: DiffResult) {
       lines.push(formatEventLine({ title: d.payload.title, starts_at: d.payload.starts_at, url: d.payload.url ?? undefined, calendarName: nameRow?.name ?? null }));
     }
     if (lines.length === 0) continue;
-    const content = lines.join('\n');
+    const header = 'Updates from FAB Events:';
+    const footer = `\n\nBrowse and subscribe: ${SITE_URL}`;
+    const content = [header, ...lines].join('\n') + footer;
     try {
       await rest.post(Routes.channelMessages(channel_id), { body: { content } });
     } catch (err) {
@@ -42,3 +46,4 @@ export async function sendNotifications(diffs: DiffResult) {
     }
   }
 }
+
