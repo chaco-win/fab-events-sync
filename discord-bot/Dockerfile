@@ -8,7 +8,8 @@ RUN npm ci --omit=dev || npm i --omit=dev
 
 FROM base AS build
 COPY package.json package-lock.json* ./
-RUN npm ci
+# Fall back to npm install if lockfile is absent
+RUN npm ci || npm i
 COPY tsconfig.json ./
 COPY src ./src
 RUN npm run build
@@ -22,4 +23,3 @@ COPY --from=build /app/package.json ./package.json
 
 # Default command can be overridden by compose service
 CMD ["node", "dist/cmd.js"]
-
