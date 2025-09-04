@@ -1,4 +1,5 @@
-import { REST, Routes } from '@discordjs/rest';
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v10';
 import { db } from './db.js';
 import { DiffResult } from './diff.js';
 
@@ -41,4 +42,3 @@ export async function sendNotifications(diffs: DiffResult) {
     }
   }
 }
-

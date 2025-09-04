@@ -1,5 +1,7 @@
 import './env.js';
-import { Client, GatewayIntentBits, Partials, REST, Routes, SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+import { Client, GatewayIntentBits, Partials, SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v10';
 import { db, migrate } from './db.js';
 
 const TOKEN = process.env.DISCORD_TOKEN || '';
