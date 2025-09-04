@@ -8,6 +8,7 @@ export type EventRecord = {
   updated_at?: string | null; // ISO
   location?: string | null;
   is_global?: boolean; // derived from source file (e.g., global_events.json)
+  calendar_name?: string; // friendly name derived from source
 };
 
 export type GuildSettings = {

@@ -75,21 +75,29 @@ client.on('interactionCreate', async (interaction) => {
     return;
   }
   if (sub === 'subscribe') {
-    const cal = interaction.options.getString('calendar_id', true);
+    const input = interaction.options.getString('calendar_id', true);
+    const row = db.prepare('SELECT calendar_id, COALESCE(name, calendar_id) AS name FROM calendars WHERE calendar_id = ? OR name = ?').get(input, input) as { calendar_id: string; name: string } | undefined;
+    const cal = row?.calendar_id ?? input;
+    const name = row?.name ?? input;
     db.prepare('INSERT OR IGNORE INTO guild_calendar_subscriptions(guild_id, calendar_id) VALUES (?,?)').run(interaction.guildId!, cal);
-    await interaction.reply({ content: `Subscribed to ${cal}`, ephemeral: true });
+    await interaction.reply({ content: `Subscribed to ${name} (${cal})`, ephemeral: true });
     return;
   }
   if (sub === 'unsubscribe') {
-    const cal = interaction.options.getString('calendar_id', true);
+    const input = interaction.options.getString('calendar_id', true);
+    const row = db.prepare('SELECT calendar_id, COALESCE(name, calendar_id) AS name FROM calendars WHERE calendar_id = ? OR name = ?').get(input, input) as { calendar_id: string; name: string } | undefined;
+    const cal = row?.calendar_id ?? input;
+    const name = row?.name ?? input;
     db.prepare('DELETE FROM guild_calendar_subscriptions WHERE guild_id = ? AND calendar_id = ?').run(interaction.guildId!, cal);
-    await interaction.reply({ content: `Unsubscribed from ${cal}`, ephemeral: true });
+    await interaction.reply({ content: `Unsubscribed from ${name} (${cal})`, ephemeral: true });
     return;
   }
   if (sub === 'list') {
-    const subs = db.prepare('SELECT calendar_id FROM guild_calendar_subscriptions WHERE guild_id = ?').all(interaction.guildId!) as { calendar_id: string }[];
-    const cals = db.prepare('SELECT calendar_id, COALESCE(name, calendar_id) as name FROM calendars ORDER BY calendar_id').all() as { calendar_id: string; name: string }[];
-    const text = `Subscriptions: ${subs.map(s => s.calendar_id).join(', ') || 'none'}\nAvailable calendars: ${cals.map(c => `${c.calendar_id}`).join(', ') || 'none'}`;
+    const subs = db.prepare('SELECT gcs.calendar_id, COALESCE(c.name, gcs.calendar_id) AS name FROM guild_calendar_subscriptions gcs LEFT JOIN calendars c ON c.calendar_id = gcs.calendar_id WHERE gcs.guild_id = ?').all(interaction.guildId!) as { calendar_id: string; name: string }[];
+    const cals = db.prepare('SELECT calendar_id, COALESCE(name, calendar_id) as name FROM calendars ORDER BY name, calendar_id').all() as { calendar_id: string; name: string }[];
+    const subsText = subs.length ? subs.map(s => `${s.name} (${s.calendar_id})`).join(', ') : 'none';
+    const availText = cals.length ? cals.map(c => `${c.name} (${c.calendar_id})`).join('\n') : 'none';
+    const text = `Subscriptions: ${subsText}\nAvailable calendars:\n${availText}`;
     await interaction.reply({ content: text, ephemeral: true });
     return;
   }
