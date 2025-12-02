@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 
-// Force the DB path to the mounted volume to avoid env drift.
-const DB_PATH = '/botdata/bot.db';
+// Allow override via env, default to mounted volume path in containers.
+const DB_PATH = process.env.DB_PATH || '/botdata/bot.db';
 
 // Log the resolved DB path to simplify debugging in containers.
 // eslint-disable-next-line no-console
