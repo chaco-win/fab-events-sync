@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 
-// Default to /data so it works with a named volume, unless overridden by env.
-const DB_PATH = process.env.DB_PATH || '/data/bot.db';
+// Default to /app/var with a named volume, unless overridden by env.
+const DB_PATH = process.env.DB_PATH || '/app/var/bot.db';
 
 export const db = new Database(DB_PATH);
 
