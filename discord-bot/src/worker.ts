@@ -7,7 +7,8 @@ import { sendNotifications } from './notify.js';
 
 migrate();
 
-const DATA_JSON_PATH = process.env.DATA_JSON_PATH || '/app/data/events.json';
+// Default to directory so multiple calendar files are discovered (matches README/.env.example).
+const DATA_JSON_PATH = process.env.DATA_JSON_PATH || '/app/data';
 const CRON = process.env.SCHEDULE_CRON || '0 9 * * 3'; // Wed 09:00
 const TZ = process.env.TZ || 'America/Chicago';
 
