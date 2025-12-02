@@ -3,6 +3,10 @@ import Database from 'better-sqlite3';
 // Default to /botdata with a named volume, unless overridden by env.
 const DB_PATH = process.env.DB_PATH || '/botdata/bot.db';
 
+// Log the resolved DB path to simplify debugging in containers.
+// eslint-disable-next-line no-console
+console.log(`Using DB at ${DB_PATH}`);
+
 export const db = new Database(DB_PATH);
 
 export function migrate() {

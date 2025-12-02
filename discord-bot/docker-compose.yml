@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     environment:
-      - DB_PATH=/botdata/bot.db
+      - DB_PATH=${DB_PATH:-/botdata/bot.db}
       - TZ=${TZ:-America/Chicago}
     volumes:
       - bot_data:/botdata
@@ -21,7 +21,7 @@ services:
     env_file:
       - .env
     environment:
-      - DB_PATH=/botdata/bot.db
+      - DB_PATH=${DB_PATH:-/botdata/bot.db}
       - DATA_JSON_PATH=/app/data
       - SCHEDULE_CRON=${SCHEDULE_CRON:-0 9 * * 3}
       - TZ=${TZ:-America/Chicago}
