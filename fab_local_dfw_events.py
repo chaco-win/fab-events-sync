@@ -5,13 +5,12 @@ Fetches competitive event types with dynamic filter discovery
 """
 
 import requests
-from bs4 import BeautifulSoup
 import re
 import json
 import time
 import logging
 import os
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from datetime import datetime, timedelta
 from googleapiclient.discovery import build
 from google.oauth2.service_account import Credentials
@@ -24,11 +23,25 @@ if os.path.exists('.env.local'):
     load_dotenv(dotenv_path='.env.local', override=True)
 
 # Configuration constants
-BASE_URL = os.getenv('FAB_LOCAL_URL', 'https://fabtcg.com/en/events/')
+EVENTS_API_URL = os.getenv('FAB_LOCAL_API_URL', 'https://gem.fabtcg.com/api/v1/locator/events/')
+API_LANGUAGE = os.getenv('FAB_API_LANGUAGE', 'en-US')
 SEARCH_LOCATION = os.getenv('SEARCH_LOCATION', 'Fort Worth, TX 76117, USA')
 MAX_DISTANCE_COMPETITIVE = int(os.getenv('MAX_DISTANCE_COMPETITIVE', '250'))
 MAX_DISTANCE_PRERELEASE = int(os.getenv('MAX_DISTANCE_PRERELEASE', '100'))
 REQUEST_DELAY = int(os.getenv('REQUEST_DELAY', '1'))  # seconds between requests
+DISTANCE_UNIT = os.getenv('DISTANCE_UNIT', 'mi').lower()
+if DISTANCE_UNIT not in ('mi', 'km'):
+    DISTANCE_UNIT = 'mi'
+
+DISTANCE_CONVERSION = 1.609344  # miles <-> km
+
+TARGET_EVENT_TYPE_MATCHERS: List[Tuple[str, List[str]]] = [
+    ('Pro Quest+', ['pro quest+']),
+    ('Pro Quest', ['pro quest']),
+    ('Skirmish', ['skirmish']),
+    ('Road to Nationals', ['road to nationals']),
+    ('Prerelease', ['prerelease', 'pre-release', 'pre release']),
+]
 
 # Google Calendar Configuration
 SCOPES = ['https://www.googleapis.com/auth/calendar']
@@ -74,321 +87,189 @@ logger = setup_logging()
 logger.info("=" * 80)
 logger.info("FAB Local DFW Events Scraper Started")
 logger.info(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-logger.info(f"Base URL: {BASE_URL}")
+logger.info(f"Events API URL: {EVENTS_API_URL}")
 logger.info(f"Search Location: {SEARCH_LOCATION}")
-logger.info(f"Max Distance (Competitive): {MAX_DISTANCE_COMPETITIVE} miles")
-logger.info(f"Max Distance (Prerelease): {MAX_DISTANCE_PRERELEASE} miles")
+logger.info(f"Max Distance (Competitive): {MAX_DISTANCE_COMPETITIVE} {DISTANCE_UNIT}")
+logger.info(f"Max Distance (Prerelease): {MAX_DISTANCE_PRERELEASE} {DISTANCE_UNIT}")
 logger.info("=" * 80)
 
-def fetch_page(url: str, params: Optional[Dict] = None) -> Optional[str]:
-    """Fetch a web page with query parameters"""
+def fetch_events_api(params: Dict) -> Optional[Dict]:
+    """Fetch event data from the FAB locator API."""
     try:
-        if params:
-            query_string = '&'.join([f"{k}={v}" for k, v in params.items()])
-            full_url = f"{url}?{query_string}"
-        else:
-            full_url = url
-            
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-        response = requests.get(full_url, headers=headers, timeout=30)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept-Language': API_LANGUAGE
+        }
+        response = requests.get(EVENTS_API_URL, headers=headers, params=params, timeout=30)
         response.raise_for_status()
-        return response.text
+        return response.json()
     except requests.RequestException as e:
-        logger.error(f"Network error fetching {url}: {e}")
+        logger.error(f"Network error fetching events: {e}")
+        return None
+    except ValueError as e:
+        logger.error(f"Invalid JSON from events API: {e}")
         return None
     except Exception as e:
-        logger.error(f"Unexpected error fetching {url}: {e}")
+        logger.error(f"Unexpected error fetching events: {e}")
         return None
 
-def find_events_on_page(html, event_type):
-    """Find events on a page for a specific event type"""
-    events = []
-    soup = BeautifulSoup(html, 'html.parser')
-    
-    # Find all h2 elements (event titles)
-    h2_elements = soup.find_all('h2')
-    
-    # Pre-compile regex patterns for efficiency
-    distance_pattern = re.compile(r'\(([\d.]+)\s*(mi|km)\)')
-    date_pattern = re.compile(r'([A-Za-z]{3})\s+(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,4})')
-    time_patterns = [
-        re.compile(r'(\d{1,2}:\d{2}\s*[AP]M)'),
-        re.compile(r'(\d{1,2}\s*[AP]M)')
-    ]
-    address_pattern = re.compile(r'([A-Za-z\s,]+,\s*[A-Z]{2}\s*\d{5})')
-    
-    # Event type patterns for store name extraction - more flexible
-    event_type_patterns = [
-        r'skirmish season \d+',           # "Skirmish Season 12" (any season)
-        r'pro quest [a-z\s]+',           # "Pro Quest Yokohama", "Pro Quest San Marcos", etc.
-        r'pro quest\+',                   # "Pro Quest+"
-        r'[a-z\s]+ pre-release',         # "Super Slam Pre-Release", "High Seas Pre-Release", etc.
-        r'pro quest',                     # Generic "Pro Quest"
-        r'road to nationals',             # "Road to Nationals"
-        r'prerelease',                    # Generic "Prerelease"
-        r'pre-release'                    # Alternative spelling
-    ]
-    
-    # Format patterns
-    format_patterns = ['Classic Constructed', 'Blitz', 'Living Legend', 'Commoner', 'Booster Draft', 'Sealed Deck', 'Crack, Shuffle, Play!', 'Ira - Learn to Play']
-    
-    for h2 in h2_elements:
-        h2_text = h2.get_text().strip()
-        if not h2_text:
+def miles_to_km(miles: float) -> float:
+    return miles * DISTANCE_CONVERSION
+
+def km_to_miles(km: float) -> float:
+    return km / DISTANCE_CONVERSION
+
+def normalize_distance_for_api(distance: int) -> int:
+    """Convert configured distance to API distance (km)."""
+    if DISTANCE_UNIT == 'km':
+        return distance
+    return int(round(miles_to_km(distance)))
+
+def normalize_distance_value(distance: Optional[float], unit: Optional[str]) -> Tuple[Optional[float], str]:
+    """Normalize API distance into configured units for display/filtering."""
+    if distance is None:
+        return None, DISTANCE_UNIT
+    unit = (unit or 'km').lower()
+    if DISTANCE_UNIT == unit:
+        return distance, unit
+    if DISTANCE_UNIT == 'mi' and unit == 'km':
+        return km_to_miles(distance), 'mi'
+    if DISTANCE_UNIT == 'km' and unit == 'mi':
+        return miles_to_km(distance), 'km'
+    return distance, unit
+
+def format_day_suffix(day: int) -> str:
+    if 11 <= day <= 13:
+        return "th"
+    if day % 10 == 1:
+        return "st"
+    if day % 10 == 2:
+        return "nd"
+    if day % 10 == 3:
+        return "rd"
+    return "th"
+
+def format_date_text(dt: datetime) -> str:
+    day_name = dt.strftime('%a')
+    month = dt.strftime('%b')
+    suffix = format_day_suffix(dt.day)
+    return f"{day_name} {dt.day}{suffix} {month}"
+
+def format_time_text(dt: datetime) -> str:
+    return dt.strftime('%I:%M %p').lstrip('0')
+
+def parse_iso_datetime(value: Optional[str]) -> Optional[datetime]:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError:
+        return None
+
+def build_event_type_map(event_types: List[Dict]) -> Dict[int, str]:
+    """Map event type IDs to canonical labels."""
+    type_map: Dict[int, str] = {}
+    for event_type in event_types:
+        title = (event_type.get('title') or '').strip()
+        if not title:
             continue
-        
-        # Skip non-event H2 elements
-        if any(skip_text in h2_text.lower() for skip_text in ['no results found', 'no events found', 'no matches found']):
-            continue
-        
-        # Get the parent container
-        container = h2.parent
-        container_text = container.get_text()
-        
-        # Extract store name - improved logic
-        clean_text = distance_pattern.sub('', h2_text).strip()
-        
-        # For Pro Quest events, we need to handle the city name properly
-        if 'pro quest' in clean_text.lower():
-            # Look for the pattern "Pro Quest [City] [Store Name]"
-            # We want to remove "Pro Quest [City]" but keep the store name
-            pro_quest_match = re.search(r'pro quest\s+([a-z\s]+?)(?:\s+([a-z\s&\'-]+))?$', clean_text.lower())
-            if pro_quest_match:
-                city = pro_quest_match.group(1).strip()
-                store_part = pro_quest_match.group(2) if pro_quest_match.group(2) else ""
-                
-                # Remove "Pro Quest [City]" from the original text
-                pattern_to_remove = f"Pro Quest {city}"
-                store_name = re.sub(pattern_to_remove, '', clean_text, flags=re.IGNORECASE).strip()
-                
-                # If we still have the city name, remove it too
-                if city in store_name:
-                    store_name = re.sub(city, '', store_name, flags=re.IGNORECASE).strip()
-                
-                # Clean up extra whitespace and newlines
-                store_name = re.sub(r'\s+', ' ', store_name).strip()
-            else:
-                # Fallback: just remove "Pro Quest" and clean up
-                store_name = re.sub(r'pro quest', '', clean_text, flags=re.IGNORECASE).strip()
-                store_name = re.sub(r'\s+', ' ', store_name).strip()
-        else:
-            # For other event types, use the original logic
-            original_clean_text = clean_text
-            for pattern in event_type_patterns:
-                if re.match(pattern, clean_text.lower()):
-                    clean_text = re.sub(pattern, '', clean_text, flags=re.IGNORECASE).strip()
-                    break
-            
-            if not clean_text or len(clean_text) < 3:
-                for pattern in event_type_patterns:
-                    if re.search(pattern, original_clean_text.lower()):
-                        match = re.search(pattern, original_clean_text.lower())
-                        if match:
-                            end_pos = match.end()
-                            store_name = original_clean_text[end_pos:].strip()
-                            if store_name and len(store_name) > 2:
-                                break
-                        else:
-                            store_name = "Unknown Store"
-                    else:
-                        store_name = original_clean_text.strip()
-            else:
-                store_name = clean_text
-        
-        # Final cleanup
-        if not store_name or len(store_name) < 3:
-            store_name = "Unknown Store"
-        
-        # Clean up any remaining whitespace issues
-        store_name = re.sub(r'\s+', ' ', store_name).strip()
-        
-        # Create event data
-        event_data = {
-            'event_type': event_type,
-            'store_name': store_name,
-            'title': f"{event_type}: {store_name}"
-        }
-        
-        # Extract date and time from P tag (preferred) or container
-        source_text = container.find('p').get_text() if container.find('p') else container_text
-        
-        # Date
-        date_match = date_pattern.search(source_text)
-        if date_match:
-            day_name, day_num, month = date_match.groups()
-            # Fix date suffixes (1st, 2nd, 3rd, 4th, etc.)
-            day_num = int(day_num)
-            if day_num == 1:
-                suffix = "st"
-            elif day_num == 2:
-                suffix = "nd"
-            elif day_num == 3:
-                suffix = "rd"
-            elif day_num == 21:
-                suffix = "st"
-            elif day_num == 22:
-                suffix = "nd"
-            elif day_num == 23:
-                suffix = "rd"
-            elif day_num == 31:
-                suffix = "st"
-            else:
-                suffix = "th"
-            event_data['date_text'] = f"{day_name} {day_num}{suffix} {month}"
-        
-        # Time
-        for time_pattern in time_patterns:
-            time_match = time_pattern.search(source_text)
-            if time_match:
-                event_data['time'] = time_match.group(1)
+        title_lower = title.lower()
+        for label, patterns in TARGET_EVENT_TYPE_MATCHERS:
+            if any(pat in title_lower for pat in patterns):
+                type_id = event_type.get('id')
+                if isinstance(type_id, int):
+                    type_map[type_id] = label
                 break
-        
-        # Format
-        for format_name in format_patterns:
-            if format_name in container_text:
-                event_data['format'] = format_name
-                break
-        
-        # Location
-        address_match = address_pattern.search(container_text)
-        if address_match:
-            event_data['location'] = address_match.group(1).strip()
-        
-        # Distance
-        distance_match = distance_pattern.search(container_text)
-        if distance_match and len(distance_match.groups()) >= 2:
-            try:
-                event_data['distance'] = distance_match.group(1)
-                event_data['distance_unit'] = distance_match.group(2)
-            except IndexError:
-                # Fallback if groups are missing
-                event_data['distance'] = '0'
-                event_data['distance_unit'] = 'mi'
-        else:
-            # Default values if no distance found
-            event_data['distance'] = '0'
-            event_data['distance_unit'] = 'mi'
-        
-        events.append(event_data)
-    
+    return type_map
+
+def fetch_event_type_filters() -> List[Dict]:
+    """Fetch available event type filters from the API."""
+    data = fetch_events_api({'mode': 'event', 'page': 1})
+    if not data:
+        return []
+    filters = data.get('filters') or {}
+    return filters.get('event_types') or []
+
+def fetch_events_for_type(type_id: int, search: str, distance: int) -> List[Dict]:
+    """Fetch all events for a given event type with paging."""
+    events: List[Dict] = []
+    page = 1
+    while True:
+        params: Dict[str, object] = {'mode': 'event', 'page': page}
+        if search:
+            params['search'] = search
+        if distance:
+            params['distance'] = distance
+        if type_id:
+            params['type'] = type_id
+        data = fetch_events_api(params)
+        if not data:
+            break
+        results = data.get('results') or []
+        events.extend(results)
+        if not data.get('next'):
+            break
+        page += 1
+        time.sleep(REQUEST_DELAY)
     return events
 
-def get_total_pages(html):
-    """Get total number of pages from pagination"""
-    soup = BeautifulSoup(html, 'html.parser')
-    pagination = soup.find(class_=re.compile(r'pagination|pages'))
-    if not pagination:
-        return 1
-    
-    page_numbers = pagination.find_all(['a', 'span'])
-    if not page_numbers:
-        return 1
-    
-    # Find the highest page number
-    max_page = 1
-    for page_elem in page_numbers:
-        page_text = page_elem.get_text().strip()
-        if page_text.isdigit():
-            max_page = max(max_page, int(page_text))
-    
-    return max_page
+def build_event_data(item: Dict, event_type: str) -> Dict:
+    """Normalize API event data to the local event schema."""
+    store_name = item.get('organiser_name') or item.get('nickname') or "Unknown Store"
+    start_dt = parse_iso_datetime(item.get('start_time'))
+    date_text = format_date_text(start_dt) if start_dt else ''
+    time_text = format_time_text(start_dt) if start_dt else ''
 
-def discover_event_type_filters(html):
-    """Discover available event type filter options from dropdown"""
-    soup = BeautifulSoup(html, 'html.parser')
-    
-    # Find event type dropdown
-    event_type_dropdown = soup.find('select', {'name': 'type'}) or soup.find('select', {'id': 'type'})
-    if not event_type_dropdown:
-        return {}
-    
-    # Extract options
-    event_types = {}
-    for option in event_type_dropdown.find_all('option'):
-        value = option.get('value', '').strip()
-        text = option.get_text().strip()
-        if value and text:
-            event_types[text] = value
-    
-    return event_types
+    distance_value, distance_unit = normalize_distance_value(item.get('distance'), item.get('distance_unit'))
+    if distance_value is not None:
+        distance_value = round(distance_value, 2)
+
+    event_data = {
+        'event_id': item.get('id'),
+        'event_type': event_type,
+        'store_name': store_name,
+        'title': f"{event_type}: {store_name}",
+        'date_text': date_text,
+        'time': time_text,
+        'format': item.get('format_name'),
+        'location': item.get('address'),
+        'distance': str(distance_value) if distance_value is not None else '0',
+        'distance_unit': distance_unit,
+        'url': item.get('event_link'),
+        'start_time': item.get('start_time')
+    }
+
+    return event_data
 
 def scrape_specific_event_types():
-    """Scrape specific competitive event types using discovered filter values"""
-    # Discover available filters
-    main_html = fetch_page(BASE_URL)
-    if not main_html:
+    """Fetch competitive events using the locator API."""
+    event_type_filters = fetch_event_type_filters()
+    if not event_type_filters:
         return []
-    
-    event_type_filters = discover_event_type_filters(main_html)
-    
-    # Target event types and their search terms - more flexible
-    target_types = {
-        'Pro Quest': ['Pro Quest', 'Pro Quest+'],
-        'Skirmish': ['Skirmish'],
-        'Road to Nationals': ['Road to Nationals'],
-        'Prerelease': ['Prerelease', 'Pre-Release', 'Pre Release']
-    }
-    
-    # Base search parameters
-    base_params = {
-        'distance': str(MAX_DISTANCE_COMPETITIVE),
-        'query': SEARCH_LOCATION
-    }
-    
-    all_events = []
-    
-    # Scrape each target type
-    for category, search_terms in target_types.items():
-        # Find matching filters
-        matching_filters = [
-            (filter_name, filter_value) 
-            for filter_name, filter_value in event_type_filters.items()
-            if any(search_term.lower() in filter_name.lower() for search_term in search_terms)
-        ]
-        
-        if not matching_filters:
-            continue
-        
-        # Scrape each matching filter
-        for filter_name, filter_value in matching_filters:
-            params = base_params.copy()
-            params['type'] = filter_value
-            
-            # Scrape all pages for this filter
-            page = 1
-            while True:
-                page_params = params.copy()
-                page_params['page'] = page
-                
-                html = fetch_page(BASE_URL, page_params)
-                if not html:
-                    break
-                
-                # Get total pages on first page
-                if page == 1:
-                    total_pages = get_total_pages(html)
-                
-                # Extract events from this page
-                page_events = find_events_on_page(html, category)
-                all_events.extend(page_events)
-                
-                if page >= total_pages:
-                    break
-                
-                page += 1
-                time.sleep(REQUEST_DELAY)  # Be nice to the server
-    
-    # Remove duplicates based on store name and date
+
+    type_map = build_event_type_map(event_type_filters)
+    if not type_map:
+        logger.warning("No matching competitive event types found in API filters.")
+        return []
+
+    all_events: List[Dict] = []
+    for type_id, category in type_map.items():
+        max_distance = MAX_DISTANCE_PRERELEASE if category == 'Prerelease' else MAX_DISTANCE_COMPETITIVE
+        distance = normalize_distance_for_api(max_distance)
+        results = fetch_events_for_type(type_id, SEARCH_LOCATION, distance)
+        for item in results:
+            all_events.append(build_event_data(item, category))
+
+    # Remove duplicates based on API event ID
     unique_events = []
     seen_events = set()
-    
     for event in all_events:
-        # Create a unique key for each event
-        event_key = f"{event.get('store_name', '')}_{event.get('date_text', '')}_{event.get('event_type', '')}"
+        event_id = event.get('event_id')
+        event_key = event_id if event_id is not None else f"{event.get('store_name', '')}_{event.get('date_text', '')}_{event.get('event_type', '')}"
         if event_key not in seen_events:
             seen_events.add(event_key)
             unique_events.append(event)
-    
+
     return unique_events
 
 def filter_events_by_distance(events):
@@ -468,9 +349,14 @@ def setup_google_calendar():
         logger.error(f"Failed to setup Google Calendar: {e}")
         return None
 
-def parse_local_event_date(date_text):
-    """Parse local event date format (e.g., 'Sat 4th Oct') to datetime"""
+def parse_local_event_date(date_text, start_time: Optional[str] = None):
+    """Parse local event date format (e.g., 'Sat 4th Oct') or ISO start_time to datetime."""
     try:
+        if start_time:
+            iso_dt = parse_iso_datetime(start_time)
+            if iso_dt:
+                return iso_dt
+
         # Handle formats like "Sat 4th Oct", "Sun 21st Sep"
         date_pattern = r'([A-Za-z]{3})\s+(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,4})'
         match = re.search(date_pattern, date_text)
@@ -506,7 +392,7 @@ def create_calendar_event(service, event):
     """Create a Google Calendar event from local event data"""
     try:
         # Parse the date
-        event_date = parse_local_event_date(event.get('date_text', ''))
+        event_date = parse_local_event_date(event.get('date_text', ''), event.get('start_time'))
         if not event_date:
             logger.warning(f"Could not parse date for {event.get('title', 'Unknown')}")
             return None
@@ -657,7 +543,7 @@ def main():
             event_id = hashlib.sha1(base.encode('utf-8')).hexdigest()
             # Parse start date using the local parser
             try:
-                start_dt = parse_local_event_date(e.get('date_text', '') or '')
+                start_dt = parse_local_event_date(e.get('date_text', '') or '', e.get('start_time'))
             except Exception:
                 start_dt = None
             starts_at = (start_dt or datetime.utcnow()).strftime('%Y-%m-%dT00:00:00Z')

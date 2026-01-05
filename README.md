@@ -63,6 +63,18 @@ docker compose up -d
 docker compose exec fab-events-sync python health_check.py
 ```
 
+### **Manual Script Runs (Docker)**
+```bash
+# Run local DFW events sync
+docker compose exec fab-events-sync python fab_local_dfw_events.py
+
+# Run major global events sync
+docker compose exec fab-events-sync python fab_major_global_events.py
+
+# Run health check
+docker compose exec fab-events-sync python health_check.py
+```
+
 ## 📋 **System Requirements**
 
 - **OS**: Linux (Ubuntu 20.04+ recommended)
