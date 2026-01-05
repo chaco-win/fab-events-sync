@@ -8,14 +8,21 @@ LOCAL_CALENDAR_ID="your_local_calendar_id_here@group.calendar.google.com"
 GOOGLE_APPLICATION_CREDENTIALS=sa.json
 
 # FAB TCG Event URLs
-FAB_LOCAL_URL=https://fabtcg.com/en/events/
+FAB_LOCAL_API_URL=https://gem.fabtcg.com/api/v1/locator/events/
+FAB_API_LANGUAGE=en-US
 FAB_GLOBAL_URL=https://fabtcg.com/en/organised-play/
 
 # Search Configuration
 SEARCH_LOCATION=Fort Worth, TX 76117, USA
-MAX_DISTANCE_COMPETITIVE=250
+MAX_DISTANCE_COMPETITIVE=300
+SEARCH_DISTANCE_COMPETITIVE=500
 MAX_DISTANCE_PRERELEASE=100
 REQUEST_DELAY=1
+DISTANCE_UNIT=km
+
+# Cleanup Controls
+PRUNE_MISSING_FUTURE=1
+FUTURE_CLEAN_DAYS=365
 
 # Timezone
 TIMEZONE=America/Chicago

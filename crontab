@@ -1,8 +1,8 @@
 # Health check - runs weekly on Tuesday at 6 PM
 0 18 * * 2 /usr/local/bin/python /app/health_check.py
 
-# FAB Local DFW Events - runs weekly on Wednesday at 1 AM
-0 1 * * 3 /usr/local/bin/python /app/fab_local_dfw_events.py
+# FAB Local DFW Events - runs Tue/Thu/Sat at 1 AM
+0 1 * * 2,4,6 /usr/local/bin/python /app/fab_local_dfw_events.py
 
-# FAB Major Global Events - runs weekly on Wednesday at 2 AM  
-0 2 * * 3 /usr/local/bin/python /app/fab_major_global_events.py
+# FAB Major Global Events - runs Tue/Thu/Sat at 2 AM  
+0 2 * * 2,4,6 /usr/local/bin/python /app/fab_major_global_events.py

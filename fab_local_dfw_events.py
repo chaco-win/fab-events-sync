@@ -28,10 +28,13 @@ API_LANGUAGE = os.getenv('FAB_API_LANGUAGE', 'en-US')
 SEARCH_LOCATION = os.getenv('SEARCH_LOCATION', 'Fort Worth, TX 76117, USA')
 MAX_DISTANCE_COMPETITIVE = int(os.getenv('MAX_DISTANCE_COMPETITIVE', '250'))
 MAX_DISTANCE_PRERELEASE = int(os.getenv('MAX_DISTANCE_PRERELEASE', '100'))
+SEARCH_DISTANCE_COMPETITIVE = int(os.getenv('SEARCH_DISTANCE_COMPETITIVE', str(MAX_DISTANCE_COMPETITIVE)))
 REQUEST_DELAY = int(os.getenv('REQUEST_DELAY', '1'))  # seconds between requests
 DISTANCE_UNIT = os.getenv('DISTANCE_UNIT', 'mi').lower()
 if DISTANCE_UNIT not in ('mi', 'km'):
     DISTANCE_UNIT = 'mi'
+PRUNE_MISSING_FUTURE = os.getenv('PRUNE_MISSING_FUTURE', '0').lower() in ('1', 'true', 'yes')
+FUTURE_CLEAN_DAYS = int(os.getenv('FUTURE_CLEAN_DAYS', '365'))
 
 DISTANCE_CONVERSION = 1.609344  # miles <-> km
 
@@ -91,6 +94,9 @@ logger.info(f"Events API URL: {EVENTS_API_URL}")
 logger.info(f"Search Location: {SEARCH_LOCATION}")
 logger.info(f"Max Distance (Competitive): {MAX_DISTANCE_COMPETITIVE} {DISTANCE_UNIT}")
 logger.info(f"Max Distance (Prerelease): {MAX_DISTANCE_PRERELEASE} {DISTANCE_UNIT}")
+logger.info(f"Search Distance (Competitive): {SEARCH_DISTANCE_COMPETITIVE} {DISTANCE_UNIT}")
+logger.info(f"Prune Missing Future Events: {PRUNE_MISSING_FUTURE}")
+logger.info(f"Future Cleanup Window: {FUTURE_CLEAN_DAYS} days")
 logger.info("=" * 80)
 
 def fetch_events_api(params: Dict) -> Optional[Dict]:
@@ -241,6 +247,29 @@ def build_event_data(item: Dict, event_type: str) -> Dict:
 
     return event_data
 
+def is_managed_local_event(summary: str) -> bool:
+    """Limit cleanup to events that look like FAB local sync entries."""
+    summary_lower = (summary or '').lower()
+    keywords = ['pro quest', 'pro quest+', 'skirmish', 'road to nationals', 'prerelease', 'pre-release', 'pre release']
+    return any(keyword in summary_lower for keyword in keywords)
+
+def build_event_key(title: str, date_value: str) -> str:
+    return f"{title}|{date_value}"
+
+def event_date_key_from_event(event: Dict) -> Optional[str]:
+    event_date = parse_local_event_date(event.get('date_text', ''), event.get('start_time'))
+    if not event_date:
+        return None
+    return event_date.strftime('%Y-%m-%d')
+
+def event_date_key_from_calendar_item(item: Dict) -> Optional[str]:
+    start = item.get('start') or {}
+    if 'date' in start and start['date']:
+        return start['date']
+    if 'dateTime' in start and start['dateTime']:
+        return start['dateTime'][:10]
+    return None
+
 def scrape_specific_event_types():
     """Fetch competitive events using the locator API."""
     event_type_filters = fetch_event_type_filters()
@@ -254,8 +283,11 @@ def scrape_specific_event_types():
 
     all_events: List[Dict] = []
     for type_id, category in type_map.items():
-        max_distance = MAX_DISTANCE_PRERELEASE if category == 'Prerelease' else MAX_DISTANCE_COMPETITIVE
-        distance = normalize_distance_for_api(max_distance)
+        if category == 'Prerelease':
+            search_distance = MAX_DISTANCE_PRERELEASE
+        else:
+            search_distance = SEARCH_DISTANCE_COMPETITIVE
+        distance = normalize_distance_for_api(search_distance)
         results = fetch_events_for_type(type_id, SEARCH_LOCATION, distance)
         for item in results:
             all_events.append(build_event_data(item, category))
@@ -494,6 +526,70 @@ def sync_events_to_calendar(service, events):
     
     logger.info(f"Successfully synced {success_count} local events to calendar")
 
+def delete_calendar_event(service, calendar_id: str, event_id: str, event_summary: str) -> bool:
+    """Delete a calendar event by ID."""
+    try:
+        service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
+        logger.info(f"  [DELETED] {event_summary}")
+        return True
+    except Exception as e:
+        logger.error(f"  [ERROR] deleting {event_summary}: {e}")
+        return False
+
+def prune_missing_future_events(service, events):
+    """Delete future calendar events that are no longer in the latest scrape."""
+    if not PRUNE_MISSING_FUTURE:
+        return
+
+    if not LOCAL_CALENDAR_ID:
+        logger.warning("LOCAL_CALENDAR_ID not configured, skipping prune.")
+        return
+
+    now = datetime.utcnow()
+    start_date = now.isoformat(timespec='seconds') + 'Z'
+    end_date = (now + timedelta(days=FUTURE_CLEAN_DAYS)).isoformat(timespec='seconds') + 'Z'
+
+    expected_keys = set()
+    for event in events:
+        date_key = event_date_key_from_event(event)
+        if not date_key:
+            continue
+        expected_keys.add(build_event_key(event.get('title', ''), date_key))
+
+    if not expected_keys:
+        logger.warning("No expected events found for prune; skipping deletion.")
+        return
+
+    try:
+        events_result = service.events().list(
+            calendarId=LOCAL_CALENDAR_ID,
+            timeMin=start_date,
+            timeMax=end_date,
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+    except Exception as e:
+        logger.error(f"Failed to fetch calendar events for prune: {e}")
+        return
+
+    items = events_result.get('items', [])
+    deleted_count = 0
+
+    for item in items:
+        summary = item.get('summary', '')
+        if not is_managed_local_event(summary):
+            continue
+        date_key = event_date_key_from_calendar_item(item)
+        if not date_key:
+            continue
+        key = build_event_key(summary, date_key)
+        if key not in expected_keys:
+            event_id = item.get('id')
+            if event_id and delete_calendar_event(service, LOCAL_CALENDAR_ID, event_id, summary):
+                deleted_count += 1
+
+    logger.info(f"Pruned {deleted_count} future local events not in latest scrape")
+
 def health_check() -> Dict:
     """API health check function"""
     try:
@@ -573,6 +669,7 @@ def main():
     if service:
         # Sync to calendar
         sync_events_to_calendar(service, events)
+        prune_missing_future_events(service, events)
         logger.info("Calendar sync completed!")
     else:
         logger.warning("Calendar sync skipped - check LOCAL_CALENDAR_ID in .env file")
