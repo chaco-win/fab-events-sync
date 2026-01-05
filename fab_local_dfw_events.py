@@ -230,11 +230,13 @@ def build_event_data(item: Dict, event_type: str) -> Dict:
     if distance_value is not None:
         distance_value = round(distance_value, 2)
 
+    base_title = f"{event_type}: {store_name}"
     event_data = {
         'event_id': item.get('id'),
         'event_type': event_type,
         'store_name': store_name,
-        'title': f"{event_type}: {store_name}",
+        'base_title': base_title,
+        'title': base_title,
         'date_text': date_text,
         'time': time_text,
         'format': item.get('format_name'),
@@ -247,6 +249,32 @@ def build_event_data(item: Dict, event_type: str) -> Dict:
 
     return event_data
 
+def apply_distance_rank_titles(events: List[Dict]) -> None:
+    """Prefix titles with distance rank when multiple events share a date."""
+    grouped: Dict[str, List[Dict]] = {}
+    for event in events:
+        date_key = event_date_key_from_event(event)
+        if not date_key:
+            continue
+        grouped.setdefault(date_key, []).append(event)
+
+    for date_key, day_events in grouped.items():
+        if len(day_events) <= 1:
+            for event in day_events:
+                event['title'] = event.get('base_title', event.get('title', ''))
+            continue
+
+        def sort_key(ev: Dict) -> float:
+            try:
+                return float(ev.get('distance', 'inf'))
+            except (TypeError, ValueError):
+                return float('inf')
+
+        day_events.sort(key=sort_key)
+        for idx, event in enumerate(day_events, start=1):
+            base_title = event.get('base_title', event.get('title', ''))
+            event['title'] = f"{idx:02d} {base_title}"
+
 def is_managed_local_event(summary: str) -> bool:
     """Limit cleanup to events that look like FAB local sync entries."""
     summary_lower = (summary or '').lower()
@@ -255,6 +283,11 @@ def is_managed_local_event(summary: str) -> bool:
 
 def build_event_key(title: str, date_value: str) -> str:
     return f"{title}|{date_value}"
+
+def normalize_calendar_summary(summary: str) -> str:
+    if not summary:
+        return ''
+    return re.sub(r'^\d{2}\s+', '', summary).strip()
 
 def event_date_key_from_event(event: Dict) -> Optional[str]:
     event_date = parse_local_event_date(event.get('date_text', ''), event.get('start_time'))
@@ -328,6 +361,8 @@ def display_results(events):
     if not events:
         print("No competitive events found!")
         return
+
+    apply_distance_rank_titles(events)
     
     # Group events by type
     events_by_type = {}
@@ -487,6 +522,8 @@ def sync_events_to_calendar(service, events):
         logger.error("No Google Calendar service available")
         return
     
+    apply_distance_rank_titles(events)
+
     logger.info(f"Syncing {len(events)} local events to Google Calendar...")
     
     success_count = 0
@@ -497,14 +534,25 @@ def sync_events_to_calendar(service, events):
                 # Check if event already exists
                 existing_events = service.events().list(
                     calendarId=LOCAL_CALENDAR_ID,
-                    q=event.get('title', ''),
+                    q=event.get('base_title', event.get('title', '')),
                     timeMin=calendar_event['start']['date'] + 'T00:00:00Z',
                     timeMax=calendar_event['end']['date'] + 'T00:00:00Z'
                 ).execute()
-                
-                if existing_events['items']:
+
+                matching_event = None
+                for item in existing_events.get('items', []):
+                    summary = normalize_calendar_summary(item.get('summary', ''))
+                    base_title = event.get('base_title', '')
+                    if summary == event.get('title', '') or summary == base_title:
+                        matching_event = item
+                        break
+                    if base_title and summary.endswith(base_title):
+                        matching_event = item
+                        break
+
+                if matching_event:
                     # Update existing event
-                    event_id = existing_events['items'][0]['id']
+                    event_id = matching_event['id']
                     updated_event = service.events().update(
                         calendarId=LOCAL_CALENDAR_ID,
                         eventId=event_id,
@@ -554,7 +602,8 @@ def prune_missing_future_events(service, events):
         date_key = event_date_key_from_event(event)
         if not date_key:
             continue
-        expected_keys.add(build_event_key(event.get('title', ''), date_key))
+        base_title = event.get('base_title', event.get('title', ''))
+        expected_keys.add(build_event_key(base_title, date_key))
 
     if not expected_keys:
         logger.warning("No expected events found for prune; skipping deletion.")
@@ -582,7 +631,8 @@ def prune_missing_future_events(service, events):
         date_key = event_date_key_from_calendar_item(item)
         if not date_key:
             continue
-        key = build_event_key(summary, date_key)
+        base_summary = normalize_calendar_summary(summary)
+        key = build_event_key(base_summary, date_key)
         if key not in expected_keys:
             event_id = item.get('id')
             if event_id and delete_calendar_event(service, LOCAL_CALENDAR_ID, event_id, summary):
