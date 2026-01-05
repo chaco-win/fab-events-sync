@@ -273,7 +273,7 @@ def apply_distance_rank_titles(events: List[Dict]) -> None:
         day_events.sort(key=sort_key)
         for idx, event in enumerate(day_events, start=1):
             base_title = event.get('base_title', event.get('title', ''))
-            event['title'] = f"{idx:02d} {base_title}"
+            event['title'] = f"{idx:02d} • {base_title}"
 
 def is_managed_local_event(summary: str) -> bool:
     """Limit cleanup to events that look like FAB local sync entries."""
@@ -287,7 +287,7 @@ def build_event_key(title: str, date_value: str) -> str:
 def normalize_calendar_summary(summary: str) -> str:
     if not summary:
         return ''
-    return re.sub(r'^\d{2}\s+', '', summary).strip()
+    return re.sub(r'^\d{2}\s+(?:•\s+)?', '', summary).strip()
 
 def event_date_key_from_event(event: Dict) -> Optional[str]:
     event_date = parse_local_event_date(event.get('date_text', ''), event.get('start_time'))
