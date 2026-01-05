@@ -471,8 +471,8 @@ def create_calendar_event(service, event):
 def get_event_color(event_type):
     """Get Google Calendar color ID for event type - using soft, easy-on-the-eyes colors"""
     color_map = {
-        'Pro Quest': '8',      # Soft Lavender (different from major events blue)
-        'Pro Quest+': '8',     # Soft Lavender
+        'Pro Quest': '7',      # Soft Pink (unused elsewhere)
+        'Pro Quest+': '7',     # Soft Pink
         'Skirmish': '9',       # Soft Sage Green (different from major events orange)
         'Road to Nationals': '10', # Soft Peach (different from major events green)
         'Prerelease': '11',    # Soft Blue (different from major events red)
