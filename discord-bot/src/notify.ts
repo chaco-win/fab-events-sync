@@ -17,11 +17,10 @@ function formatWhen(value: string) {
   return new Date(value).toLocaleString('en-US', { timeZone: TZ });
 }
 
-function formatEventLine(e: { title: string; starts_at: string; url?: string | null; calendarName?: string | null }) {
+function formatEventLine(e: { title: string; starts_at: string; url?: string | null }) {
   const when = formatWhen(e.starts_at);
-  const link = e.url ? ` - ${e.url}` : '';
-  const cal = e.calendarName ? ` [${e.calendarName}]` : '';
-  return `- ${e.title}${cal} @ ${when}${link}`;
+  const title = e.url ? `[${e.title}](${e.url})` : e.title;
+  return `- ${title} @ ${when}`;
 }
 
 function formatChange(prev: EventRecord, next: EventRecord) {
@@ -69,15 +68,14 @@ export async function sendNotifications(diffs: DiffResult) {
       lines.push(formatEventLine({
         title: d.payload.title,
         starts_at: d.payload.starts_at,
-        url: d.payload.url ?? undefined,
-        calendarName: d.payload.calendar_name ?? null
+        url: d.payload.url ?? undefined
       }));
       continue;
     }
     if (d.type === 'event_changed' && d.previous) {
       const changeText = formatChange(d.previous, d.payload);
-      const cal = d.payload.calendar_name ? ` [${d.payload.calendar_name}]` : '';
-      lines.push(`- UPDATE: ${d.payload.title}${cal} @ ${formatWhen(d.payload.starts_at)}\n  -> ${changeText}`);
+      const title = d.payload.url ? `[${d.payload.title}](${d.payload.url})` : d.payload.title;
+      lines.push(`- UPDATE: ${title} @ ${formatWhen(d.payload.starts_at)}\n  -> ${changeText}`);
     }
   }
 
