@@ -17,9 +17,16 @@ function formatWhen(value: string) {
   return new Date(value).toLocaleString('en-US', { timeZone: TZ });
 }
 
-function formatEventLine(e: { title: string; starts_at: string; url?: string | null }) {
+function formatEventTitle(e: { title: string; url?: string | null }) {
+  return e.url ? `[${e.title}](${e.url})` : e.title;
+}
+
+function formatEventLine(e: { title: string; starts_at: string; url?: string | null; is_global?: boolean }) {
+  const title = formatEventTitle(e);
+  if (e.is_global) {
+    return `- ${title}`;
+  }
   const when = formatWhen(e.starts_at);
-  const title = e.url ? `[${e.title}](${e.url})` : e.title;
   return `- ${title} @ ${when}`;
 }
 
@@ -68,14 +75,19 @@ export async function sendNotifications(diffs: DiffResult) {
       lines.push(formatEventLine({
         title: d.payload.title,
         starts_at: d.payload.starts_at,
-        url: d.payload.url ?? undefined
+        url: d.payload.url ?? undefined,
+        is_global: d.payload.is_global ?? false
       }));
       continue;
     }
     if (d.type === 'event_changed' && d.previous) {
       const changeText = formatChange(d.previous, d.payload);
-      const title = d.payload.url ? `[${d.payload.title}](${d.payload.url})` : d.payload.title;
-      lines.push(`- UPDATE: ${title} @ ${formatWhen(d.payload.starts_at)}\n  -> ${changeText}`);
+      const title = formatEventTitle(d.payload);
+      if (d.payload.is_global) {
+        lines.push(`- UPDATE: ${title}\n  -> ${changeText}`);
+      } else {
+        lines.push(`- UPDATE: ${title} @ ${formatWhen(d.payload.starts_at)}\n  -> ${changeText}`);
+      }
     }
   }
 
