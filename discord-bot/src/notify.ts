@@ -78,12 +78,28 @@ export async function sendNotifications(diffs: DiffResult) {
   if (lines.length === 0) return;
   const header = 'Updates from FAB Events:';
   const footer = `\n\nBrowse and subscribe: ${SITE_URL}`;
-  const content = [header, ...lines].join('\n') + footer;
+  const maxLen = 4000;
+
+  const chunks: string[] = [];
+  let current = header;
+  for (const line of lines) {
+    if ((current + '\n' + line).length + footer.length > maxLen) {
+      chunks.push(current);
+      current = header + '\n' + line;
+    } else {
+      current += '\n' + line;
+    }
+  }
+  if (current.trim()) chunks.push(current);
+
   for (const channelId of CHANNEL_IDS) {
-    try {
-      await rest.post(Routes.channelMessages(channelId), { body: { content } });
-    } catch (err) {
-      console.error('Failed to send message', { channel_id: channelId, err });
+    for (const chunk of chunks) {
+      const content = chunk + footer;
+      try {
+        await rest.post(Routes.channelMessages(channelId), { body: { content } });
+      } catch (err) {
+        console.error('Failed to send message', { channel_id: channelId, err });
+      }
     }
   }
 }
