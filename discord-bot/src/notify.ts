@@ -78,7 +78,7 @@ export async function sendNotifications(diffs: DiffResult) {
   if (lines.length === 0) return;
   const header = 'Updates from FAB Events:';
   const footer = `\n\nBrowse and subscribe: ${SITE_URL}`;
-  const maxLen = 4000;
+  const maxLen = 2000;
 
   const chunks: string[] = [];
   let current = header;
