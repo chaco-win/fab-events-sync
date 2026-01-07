@@ -26,7 +26,8 @@ draft: false
 
 <div class="card tight-after">
 <h2>Discord Bot</h2>
-<p class="muted">Invite link coming soon.</p>
+<p><a class="btn btn-primary" href="https://discord.com/oauth2/authorize?client_id=1412569189511725160&permissions=2147485696&integration_type=0&scope=bot+applications.commands">Invite the bot</a></p>
+<p class="muted">After inviting, run <code>/notify set-channel</code> in the channel you want updates in.</p>
 </div>
 
 <div class="card mt-tight">
