@@ -73,6 +73,9 @@ docker compose exec fab-events-sync python fab_major_global_events.py
 
 # Run health check
 docker compose exec fab-events-sync python health_check.py
+
+# Clear calendars (prompts before deleting)
+docker compose exec fab-events-sync python clean_calendar.py
 ```
 
 ## 📋 **System Requirements**

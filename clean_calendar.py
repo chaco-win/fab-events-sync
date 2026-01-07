@@ -77,12 +77,15 @@ def setup_google_calendar() -> Optional[build]:
         logger.error(f"Error setting up Google Calendar: {e}")
         return None
 
-def get_events_to_clean(service: build, calendar_id: str, calendar_name: str) -> List[Dict]:
-    """Get events to clean from a specific calendar (all events for local, FAB events for global)"""
+def get_events_to_clean(service: build, calendar_id: str, calendar_name: str, future_only: bool) -> List[Dict]:
+    """Get events to clean from a specific calendar (all events for local, FAB events for global)."""
     try:
-        # Get events from the last 30 days to the next 365 days
+        # Get events from now forward, or include recent past for full cleanup.
         now = datetime.utcnow()
-        start_date = (now - timedelta(days=30)).isoformat() + 'Z'
+        if future_only:
+            start_date = now.isoformat() + 'Z'
+        else:
+            start_date = (now - timedelta(days=30)).isoformat() + 'Z'
         end_date = (now + timedelta(days=365)).isoformat() + 'Z'
         
         logger.info(f"Fetching events from {calendar_name} calendar...")
@@ -132,7 +135,7 @@ def delete_event(service: build, calendar_id: str, event_id: str, event_summary:
         logger.error(f"  [ERROR] deleting {event_summary}: {e}")
         return False
 
-def clean_calendar(service: build, calendar_id: str, calendar_name: str) -> int:
+def clean_calendar(service: build, calendar_id: str, calendar_name: str, future_only: bool) -> int:
     """Clean all FAB events from a specific calendar"""
     if not calendar_id:
         logger.warning(f"No {calendar_name} calendar ID configured, skipping...")
@@ -141,7 +144,7 @@ def clean_calendar(service: build, calendar_id: str, calendar_name: str) -> int:
     logger.info(f"Cleaning {calendar_name} calendar...")
     
     # Get events to clean (all for local, FAB events for global)
-    events = get_events_to_clean(service, calendar_id, calendar_name)
+    events = get_events_to_clean(service, calendar_id, calendar_name, future_only)
     
     if not events:
         logger.info(f"No events found in {calendar_name} calendar")
@@ -197,6 +200,10 @@ def main():
         logger.error("No calendar IDs configured! Check your .env file.")
         logger.error("Required variables: LOCAL_CALENDAR_ID and/or CALENDAR_ID")
         return
+
+    # Cleanup scope prompt
+    prompt = "Delete future events only? (yes/no): "
+    future_only = input(prompt).strip().lower() in ('y', 'yes')
     
     # Set up Google Calendar service
     logger.info("Setting up Google Calendar service...")
@@ -210,14 +217,14 @@ def main():
     
     # Clean local calendar
     if LOCAL_CALENDAR_ID:
-        deleted_local = clean_calendar(service, LOCAL_CALENDAR_ID, "Local DFW")
+        deleted_local = clean_calendar(service, LOCAL_CALENDAR_ID, "Local DFW", future_only)
         total_deleted += deleted_local
     else:
         logger.info("Local calendar ID not configured, skipping...")
     
     # Clean global calendar
     if GLOBAL_CALENDAR_ID:
-        deleted_global = clean_calendar(service, GLOBAL_CALENDAR_ID, "Global Major")
+        deleted_global = clean_calendar(service, GLOBAL_CALENDAR_ID, "Global Major", future_only)
         total_deleted += deleted_global
     else:
         logger.info("Global calendar ID not configured, skipping...")
