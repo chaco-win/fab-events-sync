@@ -14,7 +14,8 @@ Quick start
 
 Environment
 - `DISCORD_TOKEN`: Bot token.
-- `DISCORD_CHANNEL_ID`: Channel ID to post notifications into.
+- `DISCORD_CHANNEL_ID`: Single channel ID to post notifications into.
+- `DISCORD_CHANNEL_IDS`: Comma-separated list of channel IDs (overrides `DISCORD_CHANNEL_ID` when set).
 - `DATA_JSON_PATH`: Path in container to events JSON directory or file (default `/app/data`).
 - `SCHEDULE_CRON`: Default `0 9 * * 3` (Wednesday 09:00). TZ via `TZ` (default `America/Chicago`).
 

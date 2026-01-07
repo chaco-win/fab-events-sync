@@ -4,7 +4,10 @@ import { DiffResult } from './diff.js';
 import { EventRecord } from './types.js';
 
 const TOKEN = process.env.DISCORD_TOKEN || '';
-const CHANNEL_ID = process.env.DISCORD_CHANNEL_ID || '';
+const CHANNEL_IDS = (process.env.DISCORD_CHANNEL_IDS || process.env.DISCORD_CHANNEL_ID || '')
+  .split(',')
+  .map(id => id.trim())
+  .filter(Boolean);
 const SITE_URL = process.env.SITE_URL || 'https://fabevents.chaco.dev';
 const TZ = process.env.TZ || 'America/Chicago';
 const rest = TOKEN ? new REST({ version: '10' }).setToken(TOKEN) : null;
@@ -49,8 +52,8 @@ export async function sendNotifications(diffs: DiffResult) {
     console.warn('DISCORD_TOKEN not set; skipping notifications');
     return;
   }
-  if (!CHANNEL_ID) {
-    console.warn('DISCORD_CHANNEL_ID not set; skipping notifications');
+  if (CHANNEL_IDS.length === 0) {
+    console.warn('DISCORD_CHANNEL_ID(S) not set; skipping notifications');
     return;
   }
 
@@ -76,9 +79,11 @@ export async function sendNotifications(diffs: DiffResult) {
   const header = 'Updates from FAB Events:';
   const footer = `\n\nBrowse and subscribe: ${SITE_URL}`;
   const content = [header, ...lines].join('\n') + footer;
-  try {
-    await rest.post(Routes.channelMessages(CHANNEL_ID), { body: { content } });
-  } catch (err) {
-    console.error('Failed to send message', { channel_id: CHANNEL_ID, err });
+  for (const channelId of CHANNEL_IDS) {
+    try {
+      await rest.post(Routes.channelMessages(channelId), { body: { content } });
+    } catch (err) {
+      console.error('Failed to send message', { channel_id: channelId, err });
+    }
   }
 }
