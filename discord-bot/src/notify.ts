@@ -1,5 +1,6 @@
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v10';
+import { db } from './db.js';
 import { DiffResult } from './diff.js';
 import { EventRecord } from './types.js';
 
@@ -52,8 +53,13 @@ export async function sendNotifications(diffs: DiffResult) {
     console.warn('DISCORD_TOKEN not set; skipping notifications');
     return;
   }
-  if (CHANNEL_IDS.length === 0) {
-    console.warn('DISCORD_CHANNEL_ID(S) not set; skipping notifications');
+  const channelIds = CHANNEL_IDS.length
+    ? CHANNEL_IDS
+    : (db.prepare('SELECT channel_id FROM guild_settings WHERE channel_id IS NOT NULL').all() as { channel_id: string }[])
+        .map(row => row.channel_id);
+
+  if (channelIds.length === 0) {
+    console.warn('No channel IDs configured; skipping notifications');
     return;
   }
 
@@ -92,7 +98,7 @@ export async function sendNotifications(diffs: DiffResult) {
   }
   if (current.trim()) chunks.push(current);
 
-  for (const channelId of CHANNEL_IDS) {
+  for (const channelId of channelIds) {
     for (const chunk of chunks) {
       const content = chunk + footer;
       try {

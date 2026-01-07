@@ -1,4 +1,19 @@
 services:
+  bot-cmd:
+    build: .
+    image: fab-events-discord-bot:latest
+    container_name: fab-bot-cmd
+    env_file:
+      - .env
+    environment:
+      - DB_PATH=/botdata/bot.db
+      - TZ=${TZ:-America/Chicago}
+    volumes:
+      - bot_data:/botdata
+      - ../data:/app/data:ro
+    command: ["node", "dist/cmd.js"]
+    restart: unless-stopped
+
   bot-worker:
     build: .
     image: fab-events-discord-bot:latest

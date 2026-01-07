@@ -2,7 +2,8 @@
 
 This bot posts notifications about new events and event changes for both local and global calendars.
 
-- Worker service: runs on a schedule, reads `../data/*.json`, diffs against DB, and posts to a single channel.
+- Command service: provides `/notify set-channel` to pick a channel per server.
+- Worker service: runs on a schedule, reads `../data/*.json`, diffs against DB, and posts to a single channel or the configured channel per guild.
 
 ## Links
 - Live site: https://fabevents.chaco.dev
@@ -16,12 +17,17 @@ Environment
 - `DISCORD_TOKEN`: Bot token.
 - `DISCORD_CHANNEL_ID`: Single channel ID to post notifications into.
 - `DISCORD_CHANNEL_IDS`: Comma-separated list of channel IDs (overrides `DISCORD_CHANNEL_ID` when set).
+- `APP_ID`: Discord application ID (required for slash commands).
+- `GUILD_ID`: Optional. If set (or `GUILD_IDS` comma-separated), commands register per-guild for instant availability.
 - `DATA_JSON_PATH`: Path in container to events JSON directory or file (default `/app/data`).
 - `SCHEDULE_CRON`: Default `0 9 * * 2,4,6` (Tue/Thu/Sat 09:00). TZ via `TZ` (default `America/Chicago`).
 
 Data
 - Place JSON files in repo root `data/` (e.g., `global_events.json`, `dfw_events.json`).
 - Calendars are auto-discovered from the JSON and stored in SQLite for change detection.
+
+Commands
+- `/notify set-channel` (requires Manage Server) sets the channel for the current guild.
 
 DB
 - SQLite at `discord-bot/var/bot.db`.
