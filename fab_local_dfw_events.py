@@ -44,6 +44,7 @@ TARGET_EVENT_TYPE_MATCHERS: List[Tuple[str, List[str]]] = [
     ('Skirmish', ['skirmish']),
     ('Road to Nationals', ['road to nationals']),
     ('Prerelease', ['prerelease', 'pre-release', 'pre release']),
+    ('Battlegrounds', ['battlegrounds']),
 ]
 
 # Google Calendar Configuration
@@ -278,7 +279,7 @@ def apply_distance_rank_titles(events: List[Dict]) -> None:
 def is_managed_local_event(summary: str) -> bool:
     """Limit cleanup to events that look like FAB local sync entries."""
     summary_lower = (summary or '').lower()
-    keywords = ['pro quest', 'pro quest+', 'skirmish', 'road to nationals', 'prerelease', 'pre-release', 'pre release']
+    keywords = ['pro quest', 'pro quest+', 'skirmish', 'road to nationals', 'prerelease', 'pre-release', 'pre release', 'battlegrounds']
     return any(keyword in summary_lower for keyword in keywords)
 
 def build_event_key(title: str, date_value: str) -> str:
@@ -510,9 +511,10 @@ def get_event_color(event_type):
         'Pro Quest+': '7',     # Soft Pink
         'Skirmish': '9',       # Soft Sage Green (different from major events orange)
         'Road to Nationals': '10', # Soft Peach (different from major events green)
-        'Prerelease': '11',    # Soft Blue (different from major events red)
-        'Pre-Release': '11',   # Soft Blue
-        'Pre Release': '11'    # Soft Blue
+        'Prerelease': '1',     # Lavender
+        'Pre-Release': '1',    # Lavender
+        'Pre Release': '1',    # Lavender
+        'Battlegrounds': '4',  # Flamingo
     }
     return color_map.get(event_type, '1')  # Default to gray
 

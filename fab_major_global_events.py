@@ -472,7 +472,7 @@ def get_event_color(event_type: str) -> str:
     # 1=Red, 2=Orange, 3=Yellow, 4=Green, 5=Blue, 6=Purple, 7=Pink, 8=Gray, 9=Brown, 10=Default
     
     if event_type in ['World Championship', 'National Championship', 'Pro Tour']:
-        return '1'  # Red - Tier 1 events (highest)
+        return '11'  # Tomato Red - Tier 1 events (highest)
     elif event_type == 'World Premiere':
         return '2'  # Orange - Tier 2 events
     elif event_type == 'Calling':
