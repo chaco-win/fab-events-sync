@@ -170,12 +170,12 @@ def calculate_date_range_days(date_text: str) -> int:
                 start_part = parts[0].strip()
                 end_part = parts[1].strip()
                 
-                start_match = re.search(r'([A-Za-z]{3})\s+(\d{1,2})', start_part)
+                start_match = re.search(r'([A-Za-z]{3,9})\s+(\d{1,2})', start_part)
                 if start_match:
                     start_month = start_match.group(1)
                     start_day = int(start_match.group(2))
-                    
-                    end_match = re.search(r'([A-Za-z]{3})\s+(\d{1,2})', end_part)
+
+                    end_match = re.search(r'([A-Za-z]{3,9})\s+(\d{1,2})', end_part)
                     if end_match:
                         end_month = end_match.group(1)
                         end_day = int(end_match.group(2))
@@ -212,29 +212,32 @@ def parse_date_to_datetime(date_text: str) -> tuple[Optional[datetime], Optional
                 end_part = parts[1].strip()
                 
                 # Check if this is a cross-month date (e.g., "Oct 31 - Nov 2, 2025")
-                cross_month_match = re.search(r'([A-Za-z]{3})\s+(\d{1,2})\s*-\s*([A-Za-z]{3})\s+(\d{1,2})', date_text)
+                cross_month_match = re.search(r'([A-Za-z]{3,9})\s+(\d{1,2})\s*-\s*([A-Za-z]{3,9})\s+(\d{1,2})', date_text)
                 if cross_month_match:
                     start_month = cross_month_match.group(1)
                     start_day = int(cross_month_match.group(2))
                     end_month = cross_month_match.group(3)
                     end_day = int(cross_month_match.group(4))
-                    
+
                     year_match = re.search(r'(\d{4})', date_text)
                     if year_match:
                         year = int(year_match.group(1))
-                        
+
                         month_names = {
                             'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-                            'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+                            'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
+                            'January': 1, 'February': 2, 'March': 3, 'April': 4,
+                            'June': 6, 'July': 7, 'August': 8, 'September': 9,
+                            'October': 10, 'November': 11, 'December': 12
                         }
-                        
+
                         start_date = datetime(year, month_names[start_month], start_day)
                         end_date = datetime(year, month_names[end_month], end_day)
-                        
+
                         return start_date, end_date
-                
+
                 # Single month date (e.g., "Aug 8-10, 2025")
-                start_match = re.search(r'([A-Za-z]{3})\s+(\d{1,2})', start_part)
+                start_match = re.search(r'([A-Za-z]{3,9})\s+(\d{1,2})', start_part)
                 if start_match:
                     start_month = start_match.group(1)
                     start_day = int(start_match.group(2))
