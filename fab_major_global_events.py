@@ -10,6 +10,7 @@ import re
 import json
 import time
 import logging
+import unicodedata
 from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 
@@ -106,6 +107,10 @@ def fetch_page(url: str) -> Optional[str]:
     except Exception as e:
         logger.error(f"Unexpected error fetching {url}: {e}")
         return None
+
+def normalize_text(text: str) -> str:
+    """Normalize unicode characters to ASCII equivalents (handles stylized letters on FAB site)."""
+    return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('ascii')
 
 def find_date_in_text(text: str) -> Optional[str]:
     """Find date patterns in text using regex patterns"""
@@ -295,7 +300,7 @@ def find_all_fab_events() -> List[Dict[str, str]]:
         soup = BeautifulSoup(html, 'html.parser')
         
         # Method 1: Look for specific patterns in text and find URLs
-        all_text = soup.get_text()
+        all_text = normalize_text(soup.get_text())
         event_matches = re.findall(r'(Battle Hardened|Calling|World Championship|National Championship|Pro Tour|World Premiere):\s*([^,\n]+)', all_text)
         
         logger.info(f"Found {len(event_matches)} potential event matches in text")
