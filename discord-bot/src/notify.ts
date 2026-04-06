@@ -59,10 +59,9 @@ export async function sendNotifications(diffs: DiffResult) {
     console.warn('DISCORD_TOKEN not set; skipping notifications');
     return;
   }
-  const channelIds = CHANNEL_IDS.length
-    ? CHANNEL_IDS
-    : (db.prepare('SELECT channel_id FROM guild_settings WHERE channel_id IS NOT NULL').all() as { channel_id: string }[])
-        .map(row => row.channel_id);
+  const dbChannelIds = (db.prepare('SELECT channel_id FROM guild_settings WHERE channel_id IS NOT NULL').all() as { channel_id: string }[])
+    .map(row => row.channel_id);
+  const channelIds = [...new Set([...CHANNEL_IDS, ...dbChannelIds])];
 
   if (channelIds.length === 0) {
     console.warn('No channel IDs configured; skipping notifications');
