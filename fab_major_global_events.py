@@ -110,18 +110,18 @@ def fetch_page(url: str) -> Optional[str]:
 def find_date_in_text(text: str) -> Optional[str]:
     """Find date patterns in text using regex patterns"""
     date_patterns = [
-        # Single month patterns
-        r'([A-Za-z]{3}\s+\d{1,2}-\d{1,2},?\s+\d{4})',  # Aug 15-17, 2025
-        r'([A-Za-z]{3}\s+\d{1,2}-\d{1,2}\s+\d{4})',   # Aug 15-17 2025
-        r'([A-Za-z]{3}\s+\d{1,2}\s*-\s*\d{1,2},?\s+\d{4})',  # Aug 15 - 17, 2025
-        r'([A-Za-z]{3}\s+\d{1,2}\s*-\s*\d{1,2}\s+\d{4})',    # Aug 15 - 17 2025
-        
+        # Single month patterns (3-letter abbrev or full name)
+        r'([A-Za-z]{3,9}\s+\d{1,2}-\d{1,2},?\s+\d{4})',  # Aug/August 15-17, 2025
+        r'([A-Za-z]{3,9}\s+\d{1,2}-\d{1,2}\s+\d{4})',    # Aug/August 15-17 2025
+        r'([A-Za-z]{3,9}\s+\d{1,2}\s*-\s*\d{1,2},?\s+\d{4})',  # Aug/August 15 - 17, 2025
+        r'([A-Za-z]{3,9}\s+\d{1,2}\s*-\s*\d{1,2}\s+\d{4})',    # Aug/August 15 - 17 2025
+
         # Cross-month patterns
-        r'([A-Za-z]{3}\s+\d{1,2}\s*-\s*[A-Za-z]{3}\s+\d{1,2},?\s+\d{4})',  # Oct 31 - Nov 2, 2025
-        r'([A-Za-z]{3}\s+\d{1,2}\s*-\s*[A-Za-z]{3}\s+\d{1,2}\s+\d{4})',    # Oct 31 - Nov 2 2025
-        
+        r'([A-Za-z]{3,9}\s+\d{1,2}\s*-\s*[A-Za-z]{3,9}\s+\d{1,2},?\s+\d{4})',  # Oct 31 - Nov 2, 2025
+        r'([A-Za-z]{3,9}\s+\d{1,2}\s*-\s*[A-Za-z]{3,9}\s+\d{1,2}\s+\d{4})',    # Oct 31 - Nov 2 2025
+
         # Dates without year
-        r'([A-Za-z]{3}\s+\d{1,2}\s*-\s*[A-Za-z]{3}\s+\d{1,2})',  # Oct 31 - Nov 2
+        r'([A-Za-z]{3,9}\s+\d{1,2}\s*-\s*[A-Za-z]{3,9}\s+\d{1,2})',  # Oct 31 - Nov 2
     ]
     
     for pattern in date_patterns:
@@ -138,11 +138,12 @@ def find_date_in_text(text: str) -> Optional[str]:
 def extract_event_info_from_text(text: str) -> tuple[Optional[str], Optional[str]]:
     """Extract event type and location from text using regex patterns"""
     event_patterns = [
-        r'(Battle Hardened):\s*([^,\n]+)',  # Battle Hardened: Seoul
-        r'(Calling):\s*([^,\n]+)',          # Calling: Seattle
-        r'(World Championship):\s*([^,\n]+)', # World Championship: Philadelphia
-        r'(Pro Tour):\s*([^,\n]+)',         # Pro Tour: [Location]
-        r'(World Premiere):\s*([^,\n]+)',   # World Premiere: [Location]
+        r'(Battle Hardened):\s*([^,\n]+)',        # Battle Hardened: Seoul
+        r'(Calling):\s*([^,\n]+)',                # Calling: Seattle
+        r'(World Championship):\s*([^,\n]+)',     # World Championship: Philadelphia
+        r'(National Championship):\s*([^,\n]+)',  # National Championship: Minneapolis
+        r'(Pro Tour):\s*([^,\n]+)',               # Pro Tour: [Location]
+        r'(World Premiere):\s*([^,\n]+)',         # World Premiere: [Location]
     ]
     
     for pattern in event_patterns:
@@ -180,7 +181,10 @@ def calculate_date_range_days(date_text: str) -> int:
                             
                             month_names = {
                                 'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-                                'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+                                'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
+                                'January': 1, 'February': 2, 'March': 3, 'April': 4,
+                                'June': 6, 'July': 7, 'August': 8, 'September': 9,
+                                'October': 10, 'November': 11, 'December': 12
                             }
                             
                             start_date = datetime(year, month_names[start_month], start_day)
@@ -240,7 +244,10 @@ def parse_date_to_datetime(date_text: str) -> tuple[Optional[datetime], Optional
                             
                             month_names = {
                                 'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
-                                'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+                                'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
+                                'January': 1, 'February': 2, 'March': 3, 'April': 4,
+                                'June': 6, 'July': 7, 'August': 8, 'September': 9,
+                                'October': 10, 'November': 11, 'December': 12
                             }
                             
                             start_date = datetime(year, month_names[start_month], start_day)
@@ -259,9 +266,9 @@ def should_include_event(event_type: str, location: str) -> bool:
         return False
     
     # Always include major events
-    if event_type in ['World Championship', 'Pro Tour', 'World Premiere']:
+    if event_type in ['World Championship', 'National Championship', 'Pro Tour', 'World Premiere']:
         return True
-    
+
     # Include Calling events
     if event_type == 'Calling':
         return True
@@ -289,7 +296,7 @@ def find_all_fab_events() -> List[Dict[str, str]]:
         
         # Method 1: Look for specific patterns in text and find URLs
         all_text = soup.get_text()
-        event_matches = re.findall(r'(Battle Hardened|Calling|World Championship|Pro Tour|World Premiere):\s*([^,\n]+)', all_text)
+        event_matches = re.findall(r'(Battle Hardened|Calling|World Championship|National Championship|Pro Tour|World Premiere):\s*([^,\n]+)', all_text)
         
         logger.info(f"Found {len(event_matches)} potential event matches in text")
         
@@ -325,7 +332,7 @@ def find_all_fab_events() -> List[Dict[str, str]]:
                 continue
                 
             tag_text = tag.get_text()
-            if any(event_type in tag_text for event_type in ['Calling:', 'Battle Hardened:', 'World Championship:', 'Pro Tour:']):
+            if any(event_type in tag_text for event_type in ['Calling:', 'Battle Hardened:', 'World Championship:', 'National Championship:', 'Pro Tour:']):
                 event_type, location = extract_event_info_from_text(tag_text)
                 if event_type and location:
                     date_found = find_date_in_text(tag_text)
@@ -456,7 +463,7 @@ def get_event_color(event_type: str) -> str:
     # Google Calendar color IDs:
     # 1=Red, 2=Orange, 3=Yellow, 4=Green, 5=Blue, 6=Purple, 7=Pink, 8=Gray, 9=Brown, 10=Default
     
-    if event_type in ['World Championship', 'Pro Tour']:
+    if event_type in ['World Championship', 'National Championship', 'Pro Tour']:
         return '1'  # Red - Tier 1 events (highest)
     elif event_type == 'World Premiere':
         return '2'  # Orange - Tier 2 events
@@ -558,7 +565,7 @@ def sync_events_to_calendar(service: build, events: List[Dict[str, str]]) -> Non
 
 def get_color_emoji(event_type: str) -> str:
     """Get emoji representation of event color for console display and logging"""
-    if event_type in ['World Championship', 'Pro Tour']:
+    if event_type in ['World Championship', 'National Championship', 'Pro Tour']:
         return '🔴'  # Red
     elif event_type == 'World Premiere':
         return '🟠'  # Orange
