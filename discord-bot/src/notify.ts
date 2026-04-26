@@ -23,9 +23,6 @@ function formatEventTitle(e: { title: string; url?: string | null }) {
 
 function formatEventLine(e: { title: string; starts_at: string; url?: string | null; is_global?: boolean }) {
   const title = formatEventTitle(e);
-  if (e.is_global) {
-    return `- ${title}`;
-  }
   const when = formatWhen(e.starts_at);
   return `- ${title} @ ${when}`;
 }
@@ -88,11 +85,7 @@ export async function sendNotifications(diffs: DiffResult) {
     if (d.type === 'event_changed' && d.previous) {
       const changeText = formatChange(d.previous, d.payload);
       const title = formatEventTitle(d.payload);
-      if (d.payload.is_global) {
-        lines.push(`- UPDATE: ${title}\n  -> ${changeText}`);
-      } else {
-        lines.push(`- UPDATE: ${title} @ ${formatWhen(d.payload.starts_at)}\n  -> ${changeText}`);
-      }
+      lines.push(`- UPDATE: ${title} @ ${formatWhen(d.payload.starts_at)}\n  -> ${changeText}`);
     }
   }
 
