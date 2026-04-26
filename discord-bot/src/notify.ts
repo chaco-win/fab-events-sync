@@ -63,6 +63,12 @@ export async function sendNotifications(diffs: DiffResult) {
     .map(row => row.channel_id);
   const channelIds = [...new Set([...CHANNEL_IDS, ...dbChannelIds])];
 
+  console.log('Notification channels:', {
+    hardcodedChannels: CHANNEL_IDS,
+    dbChannels: dbChannelIds,
+    merged: channelIds
+  });
+
   if (channelIds.length === 0) {
     console.warn('No channel IDs configured; skipping notifications');
     return;

@@ -58,7 +58,12 @@ client.on('interactionCreate', async (interaction) => {
   if (interaction.options.getSubcommand() !== 'set-channel') return;
 
   const up = db.prepare('INSERT INTO guild_settings(guild_id, channel_id) VALUES (?,?) ON CONFLICT(guild_id) DO UPDATE SET channel_id = excluded.channel_id');
-  up.run(interaction.guildId!, interaction.channelId);
+  const result = up.run(interaction.guildId!, interaction.channelId);
+  console.log('Saved notification channel:', {
+    guild_id: interaction.guildId,
+    channel_id: interaction.channelId,
+    changes: result.changes
+  });
   await interaction.reply({ content: `Notifications will be sent to <#${interaction.channelId}>`, ephemeral: true });
 });
 
