@@ -626,17 +626,24 @@ def sync_events_to_calendar(service: build, events: List[Dict[str, str]]) -> Non
         calendar_event = create_calendar_event(service, event)
         if calendar_event:
             try:
-                # Check if event already exists
+                # Check if event already exists by searching all events in date range
                 existing_events = service.events().list(
                     calendarId=CALENDAR_ID,
-                    q=event['title'],
                     timeMin=calendar_event['start']['date'] + 'T00:00:00Z',
-                    timeMax=calendar_event['end']['date'] + 'T00:00:00Z'
+                    timeMax=calendar_event['end']['date'] + 'T23:59:59Z',
+                    singleEvents=True
                 ).execute()
-                
-                if existing_events['items']:
+
+                # Find exact match by title
+                found_event = None
+                for item in existing_events.get('items', []):
+                    if item.get('summary', '') == event['title']:
+                        found_event = item
+                        break
+
+                if found_event:
                     # Update existing event
-                    event_id = existing_events['items'][0]['id']
+                    event_id = found_event['id']
                     updated_event = service.events().update(
                         calendarId=CALENDAR_ID,
                         eventId=event_id,
