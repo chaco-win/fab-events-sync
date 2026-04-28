@@ -326,11 +326,12 @@ def find_all_fab_events() -> List[Dict[str, str]]:
                     # Try to find the event URL by looking for links near this event
                     event_url = find_event_url(soup, event_type.strip(), location.strip())
                     
+                    normalized_location = normalize_text(location.strip())
                     event = {
                         'type': event_type.strip(),
-                        'title': f"{event_type.strip()}: {location.strip()}",
+                        'title': f"{event_type.strip()}: {normalized_location}",
                         'date_text': date_found,
-                        'location': location.strip(),
+                        'location': normalized_location,
                         'year': '2025',
                         'source': 'text_search',
                         'url': event_url
@@ -351,11 +352,12 @@ def find_all_fab_events() -> List[Dict[str, str]]:
                         # Try to find the event URL
                         event_url = find_event_url(soup, event_type, location)
                         
+                        normalized_location = normalize_text(location)
                         event = {
                             'type': event_type,
-                            'title': f"{event_type}: {location}",
+                            'title': f"{event_type}: {normalized_location}",
                             'date_text': date_found,
-                            'location': location,
+                            'location': normalized_location,
                             'year': '2025',
                             'source': 'html_structure',
                             'url': event_url
