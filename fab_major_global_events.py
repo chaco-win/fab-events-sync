@@ -311,12 +311,13 @@ def find_all_fab_events() -> List[Dict[str, str]]:
         for event_type, location in event_matches:
             event_text = f"{event_type}: {location}"
             event_index = all_text.find(event_text)
-            
+
             if event_index != -1:
-                start = max(0, event_index - 200)
-                end = min(len(all_text), event_index + 200)
+                # Look for date AFTER the event name (not before) to avoid picking up dates from previous events
+                start = event_index + len(event_text)
+                end = min(len(all_text), start + 200)
                 surrounding_text = all_text[start:end]
-                
+
                 date_found = find_date_in_text(surrounding_text)
                 
                 if date_found:
