@@ -42,6 +42,8 @@ INCLUDE_GLOBAL_MAJORS = os.getenv('INCLUDE_GLOBAL_MAJORS', 'true').lower() == 't
 INCLUDE_US_BATTLE_HARDENED = os.getenv('INCLUDE_US_BATTLE_HARDENED', 'true').lower() == 'true'
 LOCAL_RADIUS_MILES = int(os.getenv('LOCAL_RADIUS_MILES', '100'))  # miles
 USER_LOCATION = os.getenv('USER_LOCATION', 'Seattle, WA')  # Adjust to your location
+PRUNE_MISSING_FUTURE = os.getenv('PRUNE_MISSING_FUTURE', 'true').lower() == 'true'
+FUTURE_CLEAN_DAYS = int(os.getenv('FUTURE_CLEAN_DAYS', '365'))
 
 # Configure logging to both console and file
 def setup_logging():
@@ -524,6 +526,70 @@ def create_calendar_event(service: build, event: Dict[str, str]) -> Optional[Dic
         logger.error(f"Error creating calendar event for {event['title']}: {e}")
         return None
 
+def delete_calendar_event(service, calendar_id: str, event_id: str, event_summary: str) -> bool:
+    """Delete a calendar event by ID."""
+    try:
+        service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
+        logger.info(f"  [DELETED] {event_summary}")
+        return True
+    except Exception as e:
+        logger.error(f"  [ERROR] deleting {event_summary}: {e}")
+        return False
+
+def prune_missing_future_events(service, events):
+    """Delete future calendar events that are no longer in the latest scrape."""
+    if not PRUNE_MISSING_FUTURE:
+        return
+
+    if not CALENDAR_ID:
+        logger.warning("CALENDAR_ID not configured, skipping prune.")
+        return
+
+    now = datetime.utcnow()
+    start_date = now.isoformat(timespec='seconds') + 'Z'
+    end_date = (now + timedelta(days=FUTURE_CLEAN_DAYS)).isoformat(timespec='seconds') + 'Z'
+
+    expected_keys = set()
+    for event in events:
+        if not should_include_event(event['type'], event['location']):
+            continue
+        title = event.get('title', '')
+        date_text = event.get('date_text', '')
+        expected_keys.add(f"{title}|{date_text}")
+
+    if not expected_keys:
+        logger.warning("No expected events found for prune; skipping deletion.")
+        return
+
+    try:
+        events_result = service.events().list(
+            calendarId=CALENDAR_ID,
+            timeMin=start_date,
+            timeMax=end_date,
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+    except Exception as e:
+        logger.error(f"Failed to fetch calendar events for prune: {e}")
+        return
+
+    items = events_result.get('items', [])
+    deleted_count = 0
+
+    for item in items:
+        summary = item.get('summary', '')
+        # Only prune events that look like FAB events (contain event types)
+        if not any(event_type in summary for event_type in ['Calling', 'Battle Hardened', 'World Championship', 'National Championship', 'Pro Tour', 'World Premiere']):
+            continue
+        start_dt = item.get('start', {}).get('date', '')
+        key = f"{summary}|{start_dt}"
+        if key not in expected_keys:
+            event_id = item.get('id')
+            if event_id and delete_calendar_event(service, CALENDAR_ID, event_id, summary):
+                deleted_count += 1
+
+    logger.info(f"Pruned {deleted_count} future global events not in latest scrape")
+
 def sync_events_to_calendar(service: build, events: List[Dict[str, str]]) -> None:
     """Sync FAB events to Google Calendar with duplicate detection and updates"""
     if not service:
@@ -646,6 +712,8 @@ def main():
         # Sync to calendar
         sync_events_to_calendar(service, events)
         logger.info("Calendar sync completed!")
+        # Prune old events not in latest scrape
+        prune_missing_future_events(service, events)
     else:
         logger.warning("Calendar sync skipped - check CALENDAR_ID in .env file")
     
