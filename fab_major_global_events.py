@@ -546,55 +546,8 @@ def prune_missing_future_events(service, events):
         logger.warning("CALENDAR_ID not configured, skipping prune.")
         return
 
-    now = datetime.utcnow()
-    start_date = now.isoformat(timespec='seconds') + 'Z'
-    end_date = (now + timedelta(days=FUTURE_CLEAN_DAYS)).isoformat(timespec='seconds') + 'Z'
-
-    expected_keys = set()
-    for event in events:
-        if not should_include_event(event['type'], event['location']):
-            continue
-        title = event.get('title', '')
-        date_text = event.get('date_text', '')
-        expected_keys.add(f"{title}|{date_text}")
-
-    logger.info(f"Prune: Looking for {len(expected_keys)} expected events to match against calendar")
-
-    if not expected_keys:
-        logger.warning("No expected events found for prune; skipping deletion.")
-        return
-
-    try:
-        events_result = service.events().list(
-            calendarId=CALENDAR_ID,
-            timeMin=start_date,
-            timeMax=end_date,
-            singleEvents=True,
-            orderBy='startTime'
-        ).execute()
-    except Exception as e:
-        logger.error(f"Failed to fetch calendar events for prune: {e}")
-        return
-
-    items = events_result.get('items', [])
-    deleted_count = 0
-
-    logger.info(f"Prune: Found {len(items)} events in calendar to check")
-    for item in items:
-        summary = item.get('summary', '')
-        # Only prune events that look like FAB events (contain event types)
-        if not any(event_type in summary for event_type in ['Calling', 'Battle Hardened', 'World Championship', 'National Championship', 'Pro Tour', 'World Premiere']):
-            continue
-        start_dt = item.get('start', {}).get('date', '')
-        key = f"{summary}|{start_dt}"
-        logger.debug(f"Prune: Checking calendar event: {key}")
-        if key not in expected_keys:
-            logger.info(f"Prune: Event not in scrape, will delete: {key}")
-            event_id = item.get('id')
-            if event_id and delete_calendar_event(service, CALENDAR_ID, event_id, summary):
-                deleted_count += 1
-
-    logger.info(f"Pruned {deleted_count} future global events not in latest scrape")
+    logger.info("Pruning disabled for safety - matching logic needs verification")
+    return
 
 def sync_events_to_calendar(service: build, events: List[Dict[str, str]]) -> None:
     """Sync FAB events to Google Calendar with duplicate detection and updates"""
