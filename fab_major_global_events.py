@@ -539,6 +539,7 @@ def delete_calendar_event(service, calendar_id: str, event_id: str, event_summar
 def prune_missing_future_events(service, events):
     """Delete future calendar events that are no longer in the latest scrape."""
     if not PRUNE_MISSING_FUTURE:
+        logger.info("Pruning disabled (PRUNE_MISSING_FUTURE=false)")
         return
 
     if not CALENDAR_ID:
@@ -556,6 +557,8 @@ def prune_missing_future_events(service, events):
         title = event.get('title', '')
         date_text = event.get('date_text', '')
         expected_keys.add(f"{title}|{date_text}")
+
+    logger.info(f"Prune: Looking for {len(expected_keys)} expected events to match against calendar")
 
     if not expected_keys:
         logger.warning("No expected events found for prune; skipping deletion.")
@@ -576,6 +579,7 @@ def prune_missing_future_events(service, events):
     items = events_result.get('items', [])
     deleted_count = 0
 
+    logger.info(f"Prune: Found {len(items)} events in calendar to check")
     for item in items:
         summary = item.get('summary', '')
         # Only prune events that look like FAB events (contain event types)
@@ -583,7 +587,9 @@ def prune_missing_future_events(service, events):
             continue
         start_dt = item.get('start', {}).get('date', '')
         key = f"{summary}|{start_dt}"
+        logger.debug(f"Prune: Checking calendar event: {key}")
         if key not in expected_keys:
+            logger.info(f"Prune: Event not in scrape, will delete: {key}")
             event_id = item.get('id')
             if event_id and delete_calendar_event(service, CALENDAR_ID, event_id, summary):
                 deleted_count += 1
