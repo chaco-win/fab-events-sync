@@ -39,7 +39,30 @@ export function computeDiff(events: EventRecord[]): DiffResult {
           url: prev.url ?? null,
           location: prev.location ?? null,
         };
-        results.push({ calendar_id: e.calendar_id, event_id: e.event_id, type: 'event_changed', payload: e, previous });
+
+        // Check if only the URL changed
+        const otherFieldsMatch =
+          prev.title === e.title &&
+          prev.starts_at === e.starts_at &&
+          (prev.ends_at ?? null) === (e.ends_at ?? null) &&
+          (prev.location ?? null) === (e.location ?? null);
+
+        if (otherFieldsMatch) {
+          // Only URL changed
+          if (!prev.url && e.url) {
+            // Link was added
+            results.push({ calendar_id: e.calendar_id, event_id: e.event_id, type: 'link_added', payload: e, previous });
+          } else if (prev.url && e.url && prev.url !== e.url) {
+            // Link was changed
+            results.push({ calendar_id: e.calendar_id, event_id: e.event_id, type: 'link_changed', payload: e, previous });
+          } else {
+            // Other changes
+            results.push({ calendar_id: e.calendar_id, event_id: e.event_id, type: 'event_changed', payload: e, previous });
+          }
+        } else {
+          // Multiple fields changed
+          results.push({ calendar_id: e.calendar_id, event_id: e.event_id, type: 'event_changed', payload: e, previous });
+        }
       }
     }
   }

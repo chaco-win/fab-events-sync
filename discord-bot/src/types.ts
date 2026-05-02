@@ -16,4 +16,4 @@ export type GuildSettings = {
   channel_id: string | null;
 };
 
-export type NotificationType = 'new_event' | 'event_changed';
+export type NotificationType = 'new_event' | 'event_changed' | 'link_added' | 'link_changed';

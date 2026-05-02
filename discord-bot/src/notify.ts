@@ -82,6 +82,16 @@ export async function sendNotifications(diffs: DiffResult) {
       }));
       continue;
     }
+    if (d.type === 'link_added' && d.previous) {
+      const title = formatEventTitle(d.payload);
+      lines.push(`- LINK ADDED: ${title} @ ${formatWhen(d.payload.starts_at)}\n  -> ${d.payload.url}`);
+      continue;
+    }
+    if (d.type === 'link_changed' && d.previous) {
+      const title = formatEventTitle(d.payload);
+      lines.push(`- LINK UPDATED: ${title} @ ${formatWhen(d.payload.starts_at)}\n  -> ${d.previous.url} → ${d.payload.url}`);
+      continue;
+    }
     if (d.type === 'event_changed' && d.previous) {
       const changeText = formatChange(d.previous, d.payload);
       const title = formatEventTitle(d.payload);
