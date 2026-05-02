@@ -1,12 +1,62 @@
 {{ define "main" }}
-<div class="container">
-    <div class="welcome">
-        <h2>Welcome to FAB Events Calendar</h2>
-        <p>Please choose a link below to subscribe to your preferred calendar and platform.</p>
+<div class="page-wrapper">
+    <aside class="sidebar sidebar-left">
+        <div class="ad-space">
+            <!-- Google AdSense Ad Unit - Left Sidebar -->
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_PUBLISHER_ID"
+                crossorigin="anonymous"></script>
+            <ins class="adsbygoogle"
+                style="display:block"
+                data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
+                data-ad-slot="YOUR_AD_SLOT_LEFT"
+                data-ad-format="vertical"
+                data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+    </aside>
+
+    <div class="container">
+        <div class="welcome">
+            <h2>Welcome to FAB Events Calendar</h2>
+            <p>Please choose a link below to subscribe to your preferred calendar and platform.</p>
+        </div>
+
+        {{ .Content }}
     </div>
 
-    {{ .Content }}
-    
+    <aside class="sidebar sidebar-right">
+        <div class="ad-space">
+            <!-- Google AdSense Ad Unit - Right Sidebar -->
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_PUBLISHER_ID"
+                crossorigin="anonymous"></script>
+            <ins class="adsbygoogle"
+                style="display:block"
+                data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
+                data-ad-slot="YOUR_AD_SLOT_RIGHT"
+                data-ad-format="vertical"
+                data-full-width-responsive="true"></ins>
+            <script>
+                (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+    </aside>
 </div>
+
+<footer class="bottom-banner">
+    <!-- Google AdSense Ad Unit - Bottom Banner -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_PUBLISHER_ID"
+        crossorigin="anonymous"></script>
+    <ins class="adsbygoogle"
+        style="display:block"
+        data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
+        data-ad-slot="YOUR_AD_SLOT_BOTTOM"
+        data-ad-format="horizontal"
+        data-full-width-responsive="true"></ins>
+    <script>
+        (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+</footer>
 {{ end }}
 
