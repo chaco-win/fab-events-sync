@@ -694,7 +694,10 @@ def main():
                 start_dt = parse_local_event_date(e.get('date_text', '') or '', e.get('start_time'))
             except Exception:
                 start_dt = None
-            starts_at = (start_dt or datetime.utcnow()).strftime('%Y-%m-%dT00:00:00Z')
+            if start_dt:
+                starts_at = start_dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+            else:
+                starts_at = datetime.utcnow().strftime('%Y-%m-%dT00:00:00Z')
             records.append({
                 'event_id': event_id,
                 'calendar_id': str(LOCAL_CALENDAR_ID) if LOCAL_CALENDAR_ID else 'local',
