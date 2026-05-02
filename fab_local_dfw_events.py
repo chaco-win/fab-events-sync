@@ -596,8 +596,10 @@ def prune_missing_future_events(service, events):
         return
 
     now = datetime.utcnow()
-    start_date = now.isoformat(timespec='seconds') + 'Z'
-    end_date = (now + timedelta(days=FUTURE_CLEAN_DAYS)).isoformat(timespec='seconds') + 'Z'
+    # Start pruning from tomorrow (don't prune today's events)
+    tomorrow = now + timedelta(days=1)
+    start_date = tomorrow.isoformat(timespec='seconds') + 'Z'
+    end_date = (tomorrow + timedelta(days=FUTURE_CLEAN_DAYS)).isoformat(timespec='seconds') + 'Z'
 
     expected_keys = set()
     for event in events:
