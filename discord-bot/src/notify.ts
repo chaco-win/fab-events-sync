@@ -21,16 +21,18 @@ function formatEventTitle(e: { title: string; url?: string | null }) {
   return e.url ? `[${e.title}](${e.url})` : e.title;
 }
 
-function formatEventLine(e: { title: string; starts_at: string; url?: string | null; is_global?: boolean }) {
+function formatEventLine(e: { title: string; starts_at: string; url?: string | null; is_global?: boolean; time_display?: string | null }) {
   const title = formatEventTitle(e);
-  const when = formatWhen(e.starts_at);
+  const when = e.time_display || formatWhen(e.starts_at);
   return `- ${title} @ ${when}`;
 }
 
 function formatChange(prev: EventRecord, next: EventRecord) {
   const changes: string[] = [];
   if (prev.starts_at !== next.starts_at) {
-    changes.push(`date/time: ${formatWhen(prev.starts_at)} -> ${formatWhen(next.starts_at)}`);
+    const prevTime = prev.time_display || formatWhen(prev.starts_at);
+    const nextTime = next.time_display || formatWhen(next.starts_at);
+    changes.push(`date/time: ${prevTime} -> ${nextTime}`);
   }
   if ((prev.ends_at ?? '') !== (next.ends_at ?? '')) {
     const prevEnd = prev.ends_at ? formatWhen(prev.ends_at) : 'none';
@@ -84,18 +86,21 @@ export async function sendNotifications(diffs: DiffResult) {
     }
     if (d.type === 'link_added' && d.previous) {
       const title = formatEventTitle(d.payload);
-      lines.push(`- LINK ADDED: ${title} @ ${formatWhen(d.payload.starts_at)}\n  -> ${d.payload.url}`);
+      const when = d.payload.time_display || formatWhen(d.payload.starts_at);
+      lines.push(`- LINK ADDED: ${title} @ ${when}\n  -> ${d.payload.url}`);
       continue;
     }
     if (d.type === 'link_changed' && d.previous) {
       const title = formatEventTitle(d.payload);
-      lines.push(`- LINK UPDATED: ${title} @ ${formatWhen(d.payload.starts_at)}\n  -> ${d.previous.url} → ${d.payload.url}`);
+      const when = d.payload.time_display || formatWhen(d.payload.starts_at);
+      lines.push(`- LINK UPDATED: ${title} @ ${when}\n  -> ${d.previous.url} → ${d.payload.url}`);
       continue;
     }
     if (d.type === 'event_changed' && d.previous) {
       const changeText = formatChange(d.previous, d.payload);
       const title = formatEventTitle(d.payload);
-      lines.push(`- UPDATE: ${title} @ ${formatWhen(d.payload.starts_at)}\n  -> ${changeText}`);
+      const when = d.payload.time_display || formatWhen(d.payload.starts_at);
+      lines.push(`- UPDATE: ${title} @ ${when}\n  -> ${changeText}`);
     }
   }
 

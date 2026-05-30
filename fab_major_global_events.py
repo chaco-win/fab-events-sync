@@ -727,6 +727,7 @@ def main():
                 'url': e.get('url') or None,
                 'updated_at': now_iso,
                 'location': e.get('location') or None,
+                'time_display': e.get('time', ''),
             })
         out_path = os.path.join('data', 'global_events.json')
         with open(out_path, 'w', encoding='utf-8') as f:

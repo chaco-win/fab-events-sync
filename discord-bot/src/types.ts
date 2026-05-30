@@ -9,6 +9,7 @@ export type EventRecord = {
   location?: string | null;
   is_global?: boolean; // derived from source file (e.g., global_events.json)
   calendar_name?: string; // friendly name derived from source
+  time_display?: string | null; // formatted time string (e.g., "12:00 PM")
 };
 
 export type GuildSettings = {
