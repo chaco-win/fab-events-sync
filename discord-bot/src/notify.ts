@@ -80,7 +80,8 @@ export async function sendNotifications(diffs: DiffResult) {
         title: d.payload.title,
         starts_at: d.payload.starts_at,
         url: d.payload.url ?? undefined,
-        is_global: d.payload.is_global ?? false
+        is_global: d.payload.is_global ?? false,
+        time_display: d.payload.time_display
       }));
       continue;
     }
