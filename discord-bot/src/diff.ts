@@ -2,6 +2,16 @@ import { db } from './db.js';
 import { EventRecord, NotificationType } from './types.js';
 import { hashEvent } from './hash.js';
 
+const TZ = process.env.TZ || 'America/Chicago';
+
+function localDateStr(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-CA', { timeZone: TZ });
+}
+
+function isPastEvent(startsAt: string): boolean {
+  return localDateStr(startsAt) < localDateStr(new Date().toISOString());
+}
+
 export type DiffResult = {
   calendar_id: string;
   event_id: string;
@@ -17,6 +27,8 @@ export function computeDiff(events: EventRecord[]): DiffResult {
   );
 
   for (const e of events) {
+    if (isPastEvent(e.starts_at)) continue; // don't notify about events that already happened
+
     const prev = selectPrev.get(e.calendar_id, e.event_id) as {
       title: string;
       starts_at: string;

@@ -14,7 +14,14 @@ const TZ = process.env.TZ || 'America/Chicago';
 const rest = TOKEN ? new REST({ version: '10' }).setToken(TOKEN) : null;
 
 function formatWhen(value: string) {
-  return new Date(value).toLocaleString('en-US', { timeZone: TZ });
+  return new Date(value).toLocaleString('en-US', {
+    timeZone: TZ,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
 }
 
 function formatEventTitle(e: { title: string; url?: string | null }) {
