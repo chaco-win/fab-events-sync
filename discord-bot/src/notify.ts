@@ -36,7 +36,7 @@ function formatEventTitle(e: { title: string; url?: string | null }) {
 function formatEventLine(e: { title: string; starts_at: string; url?: string | null; is_global?: boolean; time_display?: string | null }) {
   const title = formatEventTitle(e);
   const when = formatWhen(e.starts_at, e.time_display);
-  return `- ${title} @ ${when}`;
+  return `${title} @ ${when}`;
 }
 
 function formatChange(prev: EventRecord, next: EventRecord) {
@@ -100,20 +100,20 @@ export async function sendNotifications(diffs: DiffResult) {
     if (d.type === 'link_added' && d.previous) {
       const title = formatEventTitle(d.payload);
       const when = formatWhen(d.payload.starts_at, d.payload.time_display);
-      lines.push(`- LINK ADDED: ${title} @ ${when}\n  -> ${d.payload.url}`);
+      lines.push(`LINK ADDED: ${title} @ ${when}\n  -> ${d.payload.url}`);
       continue;
     }
     if (d.type === 'link_changed' && d.previous) {
       const title = formatEventTitle(d.payload);
       const when = formatWhen(d.payload.starts_at, d.payload.time_display);
-      lines.push(`- LINK UPDATED: ${title} @ ${when}\n  -> ${d.previous.url} → ${d.payload.url}`);
+      lines.push(`LINK UPDATED: ${title} @ ${when}\n  -> ${d.previous.url} → ${d.payload.url}`);
       continue;
     }
     if (d.type === 'event_changed' && d.previous) {
       const changeText = formatChange(d.previous, d.payload);
       const title = formatEventTitle(d.payload);
       const when = formatWhen(d.payload.starts_at, d.payload.time_display);
-      lines.push(`- UPDATE: ${title} @ ${when}\n  -> ${changeText}`);
+      lines.push(`UPDATE: ${title} @ ${when}\n  -> ${changeText}`);
     }
   }
 
