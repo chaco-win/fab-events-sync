@@ -13,15 +13,20 @@ const SITE_URL = process.env.SITE_URL || 'https://fabevents.chaco.dev';
 const TZ = process.env.TZ || 'America/Chicago';
 const rest = TOKEN ? new REST({ version: '10' }).setToken(TOKEN) : null;
 
-function formatWhen(value: string) {
-  return new Date(value).toLocaleString('en-US', {
-    timeZone: TZ,
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  });
+// starts_at/ends_at are written by the scrapers as local wall-clock time with
+// a trailing 'Z' (not a real UTC instant), so read the date digits directly
+// instead of running them through a timezone conversion, which would
+// re-shift an already-local time.
+function formatDatePart(value: string): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  if (!m) return new Date(value).toLocaleDateString('en-US', { timeZone: TZ });
+  const [, y, mo, d] = m;
+  return `${parseInt(mo, 10)}/${parseInt(d, 10)}/${y}`;
+}
+
+function formatWhen(value: string, timeDisplay?: string | null) {
+  const datePart = formatDatePart(value);
+  return timeDisplay ? `${datePart}, ${timeDisplay}` : datePart;
 }
 
 function formatEventTitle(e: { title: string; url?: string | null }) {
@@ -30,20 +35,20 @@ function formatEventTitle(e: { title: string; url?: string | null }) {
 
 function formatEventLine(e: { title: string; starts_at: string; url?: string | null; is_global?: boolean; time_display?: string | null }) {
   const title = formatEventTitle(e);
-  const when = e.time_display || formatWhen(e.starts_at);
+  const when = formatWhen(e.starts_at, e.time_display);
   return `- ${title} @ ${when}`;
 }
 
 function formatChange(prev: EventRecord, next: EventRecord) {
   const changes: string[] = [];
   if (prev.starts_at !== next.starts_at) {
-    const prevTime = prev.time_display || formatWhen(prev.starts_at);
-    const nextTime = next.time_display || formatWhen(next.starts_at);
+    const prevTime = formatWhen(prev.starts_at, prev.time_display);
+    const nextTime = formatWhen(next.starts_at, next.time_display);
     changes.push(`date/time: ${prevTime} -> ${nextTime}`);
   }
   if ((prev.ends_at ?? '') !== (next.ends_at ?? '')) {
-    const prevEnd = prev.ends_at ? formatWhen(prev.ends_at) : 'none';
-    const nextEnd = next.ends_at ? formatWhen(next.ends_at) : 'none';
+    const prevEnd = prev.ends_at ? formatDatePart(prev.ends_at) : 'none';
+    const nextEnd = next.ends_at ? formatDatePart(next.ends_at) : 'none';
     changes.push(`end: ${prevEnd} -> ${nextEnd}`);
   }
   if ((prev.location ?? '') !== (next.location ?? '')) {
@@ -94,20 +99,20 @@ export async function sendNotifications(diffs: DiffResult) {
     }
     if (d.type === 'link_added' && d.previous) {
       const title = formatEventTitle(d.payload);
-      const when = d.payload.time_display || formatWhen(d.payload.starts_at);
+      const when = formatWhen(d.payload.starts_at, d.payload.time_display);
       lines.push(`- LINK ADDED: ${title} @ ${when}\n  -> ${d.payload.url}`);
       continue;
     }
     if (d.type === 'link_changed' && d.previous) {
       const title = formatEventTitle(d.payload);
-      const when = d.payload.time_display || formatWhen(d.payload.starts_at);
+      const when = formatWhen(d.payload.starts_at, d.payload.time_display);
       lines.push(`- LINK UPDATED: ${title} @ ${when}\n  -> ${d.previous.url} → ${d.payload.url}`);
       continue;
     }
     if (d.type === 'event_changed' && d.previous) {
       const changeText = formatChange(d.previous, d.payload);
       const title = formatEventTitle(d.payload);
-      const when = d.payload.time_display || formatWhen(d.payload.starts_at);
+      const when = formatWhen(d.payload.starts_at, d.payload.time_display);
       lines.push(`- UPDATE: ${title} @ ${when}\n  -> ${changeText}`);
     }
   }

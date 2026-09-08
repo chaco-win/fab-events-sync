@@ -4,12 +4,20 @@ import { hashEvent } from './hash.js';
 
 const TZ = process.env.TZ || 'America/Chicago';
 
-function localDateStr(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-CA', { timeZone: TZ });
+// starts_at is written by the scrapers as local wall-clock time with a
+// trailing 'Z' (not a real UTC instant), so read the date digits directly
+// instead of running it through a timezone conversion, which would
+// re-shift an already-local time by the UTC offset.
+function eventDateStr(startsAt: string): string {
+  return startsAt.slice(0, 10);
+}
+
+function todayLocalDateStr(): string {
+  return new Date().toLocaleDateString('en-CA', { timeZone: TZ });
 }
 
 function isPastEvent(startsAt: string): boolean {
-  return localDateStr(startsAt) < localDateStr(new Date().toISOString());
+  return eventDateStr(startsAt) < todayLocalDateStr();
 }
 
 export type DiffResult = {

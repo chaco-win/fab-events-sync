@@ -689,7 +689,8 @@ def main():
         records = []
         now_iso = datetime.utcnow().replace(microsecond=0).isoformat() + 'Z'
         for e in events:
-            base = f"{LOCAL_CALENDAR_ID}:{e.get('title','')}:{e.get('location','') or e.get('store_name','')}:{e.get('date_text','')}"
+            clean_title = e.get('base_title', e.get('title', ''))
+            base = f"{LOCAL_CALENDAR_ID}:{clean_title}:{e.get('location','') or e.get('store_name','')}:{e.get('date_text','')}"
             event_id = hashlib.sha1(base.encode('utf-8')).hexdigest()
             # Parse start date using the local parser
             try:
@@ -703,7 +704,7 @@ def main():
             records.append({
                 'event_id': event_id,
                 'calendar_id': str(LOCAL_CALENDAR_ID) if LOCAL_CALENDAR_ID else 'local',
-                'title': e.get('title', ''),
+                'title': clean_title,
                 'starts_at': starts_at,
                 'ends_at': None,
                 'url': e.get('url') or None,
